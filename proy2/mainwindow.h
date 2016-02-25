@@ -22,6 +22,11 @@ namespace Ui {
 
 }
 
+typedef struct {
+    int New_DataList[4];
+    int Ori_DataList[4];
+ }Datos_pixel;
+
 
 class PixelTDialog: public QDialog, public Ui::PixelTForm
 {
@@ -79,7 +84,9 @@ private:
     bool capture, showColorImage, winSelected, loadbool,savebool;
     Rect imageWindow;
 
-    int Acction;
+    int Action;
+    Datos_pixel Datos_Kernel;
+
 
 public:
     void thresholding();
@@ -105,6 +112,9 @@ public slots:
     void ok_oper_cerrar();
 
     void obtener_accion(int indice);
+    void OperOrderFunction();
+    void chooseAction();
+    void transformPixel();
 
 
 };

@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    Acction=-1;
+    Action=-1;
 
     cap = new VideoCapture(0);
     if(!cap->isOpened())
@@ -63,8 +63,11 @@ MainWindow::~MainWindow()
     delete imgD;
 
 }
+void MainWindow::obtener_accion(int indice){
+    Action=indice;
+}
 
-
+//FUNCIONES DE PROGRAMA ORIGINAL
 void MainWindow::compute()
 {
 
@@ -76,22 +79,9 @@ void MainWindow::compute()
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
 
     }
+/*Elegir que accion ejecuta dependiendo del combo box*/
+    chooseAction();
 
-    if(Acction==1){
-        thresholding();
-    }
-    if(Acction==3){
-        SuavizadoGaussiano();
-    }
-    if(Acction==4){
-        SuavizadoMediana();
-    }
-    if(Acction==9){
-        if(ui_Oper.firstOperCheckBox->isChecked()==true){
-            qDebug()<<"esta bien";
-        }
-
-    }
     if(showColorImage)
     {
         memcpy(imgS->bits(), colorImage.data , 320*240*3*sizeof(uchar));
@@ -217,55 +207,100 @@ void MainWindow::deselectWindow()
 {
     winSelected = false;
 }
-
+//ABRIR FRAMES
 void MainWindow::abrir_Filter(){
 ui_Filter.show();
 
 }
-
 void MainWindow::abrirOperOrder(){
 ui_Oper.show();
 }
 void MainWindow::abrirPixel(){
 ui_pixel.show();
 }
-
-
+//BOTONES OK
 void MainWindow::ok_filter_cerrar(){
     ui_Filter.close();
 }
-
 void MainWindow::ok_pixel_cerrar(){
-    ui_pixel.close();
-}
+    Datos_Kernel.New_DataList[0]=ui_pixel.newPixelBox1->value();
+    Datos_Kernel.New_DataList[1]=ui_pixel.newPixelBox2->value();
+    Datos_Kernel.New_DataList[2]=ui_pixel.newPixelBox3->value();
+    Datos_Kernel.New_DataList[3]=ui_pixel.newPixelBox4->value();
 
+    Datos_Kernel.Ori_DataList[0]=ui_pixel.origPixelBox1->value();
+    Datos_Kernel.Ori_DataList[1]=ui_pixel.origPixelBox2->value();
+    Datos_Kernel.Ori_DataList[2]=ui_pixel.origPixelBox3->value();
+    Datos_Kernel.Ori_DataList[3]=ui_pixel.origPixelBox4->value();
+ui_pixel.close();
+}
 void MainWindow::ok_oper_cerrar(){
     ui_Oper.close();
 }
 
-void MainWindow::obtener_accion(int indice){
-    Acction=indice;
-}
+//OPERACIONES A REALIZAR
 
 void MainWindow::thresholding(){
     double p=(double)ui->thresholdSpinBox->value();
 
     threshold(grayImage,destGrayImage,p,255,THRESH_BINARY);
 }
-
-
-
 void MainWindow::SuavizadoGaussiano(){
     double w=(double)ui->gaussWidthBox->value();
     double sigX=w/5;
 
     GaussianBlur(grayImage,destGrayImage,Size(0,0),sigX);
 }
-
 void MainWindow::SuavizadoMediana(){
 
     medianBlur(grayImage,destGrayImage,9);
 }
+void MainWindow::transformPixel(){
+    qDebug()<<Datos_Kernel.New_DataList[0];
+    qDebug()<<Datos_Kernel.Ori_DataList[2];
+}
+
+void MainWindow::OperOrderFunction(){
+//TODO
+
+}
+
+void MainWindow::chooseAction(){
+    switch(Action){
+    case 0:
+        transformPixel();
+        break;
+    case 1:
+        thresholding();
+       break;
+    case 2:
+
+        break;
+    case 3:
+        SuavizadoGaussiano();
+
+        break;
+    case 4:
+        SuavizadoMediana();
+        break;
+    case 5:
+
+        break;
+    case 6:
+
+        break;
+    case 7:
+
+        break;
+    case 8:
+
+        break;
+    case 9:
+        OperOrderFunction();
+        break;
+    }
+}
+
 
 
 
