@@ -46,9 +46,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->operOrderButton,SIGNAL(clicked()),this,SLOT(abrirOperOrder()));
     connect(ui_Oper.okButton,SIGNAL(clicked()),this,SLOT(ok_oper_cerrar()));
 
+    connect(ui->Ori_checkHisogram, SIGNAL(clicked(bool)), this, SLOT(getOriHistogram(bool)));
+
+    connect(ui->Dest_checkHistogram, SIGNAL(clicked(bool)), this, SLOT(getNewHistogram(bool)));
     connect(ui->operationComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(obtener_accion(int)));
     timer.start(60);
 
+    OriHistogram=false;
+    DestHistogram=false;
 
 }
 
@@ -79,6 +84,18 @@ void MainWindow::compute()
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
 
     }
+
+    if(OriHistogram==true){
+        OriHistogram=false;
+        showHistogram(grayImage,"Histograma Original");
+    }
+
+    if(DestHistogram==true){
+        DestHistogram=false;
+        showHistogram(destGrayImage,"Histograma Destino");
+    }
+
+
 /*Elegir que accion ejecuta dependiendo del combo box*/
     chooseAction();
 
@@ -237,9 +254,67 @@ ui_pixel.close();
 void MainWindow::ok_oper_cerrar(){
     ui_Oper.close();
 }
+//CHECKEO HISTOGRAMA
+void MainWindow::getNewHistogram(bool start){
+    DestHistogram=start;
+}
+void MainWindow::getOriHistogram(bool start){
+    OriHistogram=start;
+}
+//SHOW HISTOGRAM
+void MainWindow::showHistogram(Mat& img, char* name)
+{
 
+    int bins = 256;             // number of bins
+    int nc = img.channels();    // number of channels
+    vector<Mat> hist(nc);       // array for storing the histograms
+    vector<Mat> canvas(nc);     // images for displaying the histogram
+    int hmax[3] = {0,0,0};      // peak value for each histogram
+
+    // The rest of the code will be placed here
+for (int i = 0; i < hist.size(); i++)
+    hist[i] = Mat::zeros(1, bins, CV_32SC1);
+for (int i = 0; i < img.rows; i++)
+{
+    for (int j = 0; j < img.cols; j++)
+    {
+        for (int k = 0; k < nc; k++)
+        {
+            uchar val = nc == 1 ? img.at<uchar>(i,j) : img.at<Vec3b>(i,j)[k];
+            hist[k].at<int>(val) += 1;
+        }
+    }
+}
+
+for (int i = 0; i < nc; i++)
+{
+    for (int j = 0; j < bins-1; j++)
+        hmax[i] = hist[i].at<int>(j) > hmax[i] ? hist[i].at<int>(j) : hmax[i];
+}
+
+const char* wname[3] = { "blue", "green", "red" };
+Scalar colors[3] = { Scalar(255,0,0), Scalar(0,255,0), Scalar(0,0,255) };
+
+for (int i = 0; i < nc; i++)
+{
+    canvas[i] = Mat::ones(125, bins, CV_8UC3);
+
+    for (int j = 0, rows = canvas[i].rows; j < bins-1; j++)
+    {
+        line(
+            canvas[i],
+            Point(j, rows),
+            Point(j, rows - (hist[i].at<int>(j) * rows/hmax[i])),
+            nc == 1 ? Scalar(200,200,200) : colors[i],
+            1, 8, 0
+        );
+    }
+
+    imshow(nc == 1 ? name : wname[i], canvas[i]);
+}
+
+}
 //OPERACIONES A REALIZAR
-
 void MainWindow::thresholding(){
     double p=(double)ui->thresholdSpinBox->value();
 
@@ -259,12 +334,15 @@ void MainWindow::transformPixel(){
     qDebug()<<Datos_Kernel.New_DataList[0];
     qDebug()<<Datos_Kernel.Ori_DataList[2];
 }
+void MainWindow::equalize(){
+    equalizeHist(grayImage, destGrayImage);
+}
 
+//OperOrder
 void MainWindow::OperOrderFunction(){
 //TODO
 
 }
-
 void MainWindow::chooseAction(){
     switch(Action){
     case 0:
@@ -274,7 +352,7 @@ void MainWindow::chooseAction(){
         thresholding();
        break;
     case 2:
-
+        equalize();
         break;
     case 3:
         SuavizadoGaussiano();
@@ -300,6 +378,8 @@ void MainWindow::chooseAction(){
         break;
     }
 }
+
+
 
 
 

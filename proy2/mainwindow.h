@@ -15,6 +15,7 @@
 #include <ui_operOrderForm.h>
 #include <ui_lFilterForm.h>
 
+
 using namespace cv;
 
 namespace Ui {
@@ -82,7 +83,13 @@ private:
     Mat colorImage, grayImage, destColorImage, destGrayImage;
     Mat gray2ColorImage, destGray2ColorImage;
     bool capture, showColorImage, winSelected, loadbool,savebool;
+    bool OriHistogram;
+    bool DestHistogram;
     Rect imageWindow;
+
+    Mat imgHistograma;
+    CvHistogram* hist;
+
 
     int Action;
     Datos_pixel Datos_Kernel;
@@ -92,6 +99,8 @@ public:
     void thresholding();
     void SuavizadoGaussiano();
     void SuavizadoMediana();
+    void transformPixel();
+    void equalize();
 
 
 public slots:
@@ -114,7 +123,12 @@ public slots:
     void obtener_accion(int indice);
     void OperOrderFunction();
     void chooseAction();
-    void transformPixel();
+
+    void getOriHistogram(bool start);
+    void getNewHistogram(bool start);
+
+    void showHistogram(Mat& img, char* name);
+
 
 
 };
