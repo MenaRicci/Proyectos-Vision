@@ -127,6 +127,7 @@ public slots:
     void ok_filter_cerrar();
     void ok_pixel_cerrar();
     void ok_oper_cerrar();
+    void saveDataFilter();
 
     void obtener_accion(int indice);
     void OperOrderFunction(Mat MatrizOrigen, Mat MatrizDestino);

@@ -235,9 +235,7 @@ ui_Oper.show();
 void MainWindow::abrirPixel(){
 ui_pixel.show();
 }
-//BOTONES OK
-
-void MainWindow::ok_filter_cerrar(){
+void MainWindow::saveDataFilter(){
 
     Datos_K.matrix_kernel.row(0).col(0)=ui_Filter.kernelBox11->value();
     Datos_K.matrix_kernel.row(0).col(1)=ui_Filter.kernelBox12->value();
@@ -252,6 +250,12 @@ void MainWindow::ok_filter_cerrar(){
     Datos_K.matrix_kernel.row(2).col(2)=ui_Filter.kernelBox33->value();
     Datos_K.value=ui_Filter.addedVBox->value();
 
+}
+
+//BOTONES OK
+
+void MainWindow::ok_filter_cerrar(){
+    saveDataFilter();
     ui_Filter.close();
 }
 
@@ -336,7 +340,8 @@ for (int i = 0; i < nc; i++)
             imshow(nc == 1 ? name : wname[i], canvas[i]);
         else
             destroyWindow(name);
-    }else if(valor==1){
+    }
+    else if(valor==1){
         if(ui->Dest_checkHistogram->isChecked())
              imshow(nc == 1 ? name : wname[i], canvas[i]);
         else
@@ -378,7 +383,8 @@ void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
 }
 
 void MainWindow::LinearFilter(Mat MatrizOrigen,Mat ImagenDestino){
-    ok_filter_cerrar();
+    saveDataFilter();
+
     filter2D(MatrizOrigen,ImagenDestino,0,Datos_K.matrix_kernel,Point(-1,-1),Datos_K.value);
 }
 
