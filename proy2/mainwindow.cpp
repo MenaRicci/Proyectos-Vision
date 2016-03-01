@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
+    Datos_K.matrix_kernel.create(3,3,CV_8UC1);
+
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
@@ -85,19 +87,13 @@ void MainWindow::compute()
 
     }
 
-    if(OriHistogram==true){
-        OriHistogram=false;
-        showHistogram(grayImage,"Histograma Original");
-    }
+   showHistogram(grayImage,"Histograma Original",0);
 
-    if(DestHistogram==true){
-        DestHistogram=false;
-        showHistogram(destGrayImage,"Histograma Destino");
-    }
+   showHistogram(destGrayImage,"Histograma Destino",1);
 
 
 /*Elegir que accion ejecuta dependiendo del combo box*/
-    chooseAction();
+    chooseAction(Action,grayImage,destGrayImage);
 
     if(showColorImage)
     {
@@ -121,6 +117,7 @@ void MainWindow::compute()
     visorD->update();
 
 }
+
 void MainWindow::save_Image()
 {
  savebool=true;
@@ -145,6 +142,7 @@ capture=false;
 capture=test;
 
 }
+
 void MainWindow::load_Image()
 {
 
@@ -171,6 +169,7 @@ cvtColor(colorImage,colorImage, CV_BGR2RGB);
 
 start_stop_capture(false);
 }
+
 void MainWindow::start_stop_capture(bool start)
 {
     if(start)
@@ -184,6 +183,7 @@ void MainWindow::start_stop_capture(bool start)
         capture = false;
     }
 }
+
 void MainWindow::change_color_gray(bool color)
 {
     if(color)
@@ -236,33 +236,54 @@ void MainWindow::abrirPixel(){
 ui_pixel.show();
 }
 //BOTONES OK
+
 void MainWindow::ok_filter_cerrar(){
+
+    Datos_K.matrix_kernel.row(0).col(0)=ui_Filter.kernelBox11->value();
+    Datos_K.matrix_kernel.row(0).col(1)=ui_Filter.kernelBox12->value();
+    Datos_K.matrix_kernel.row(0).col(2)=ui_Filter.kernelBox13->value();
+
+    Datos_K.matrix_kernel.row(1).col(0)=ui_Filter.kernelBox21->value();
+    Datos_K.matrix_kernel.row(1).col(1)=ui_Filter.kernelBox22->value();
+    Datos_K.matrix_kernel.row(1).col(2)=ui_Filter.kernelBox23->value();
+
+    Datos_K.matrix_kernel.row(2).col(0)=ui_Filter.kernelBox31->value();
+    Datos_K.matrix_kernel.row(2).col(1)=ui_Filter.kernelBox32->value();
+    Datos_K.matrix_kernel.row(2).col(2)=ui_Filter.kernelBox33->value();
+    Datos_K.value=ui_Filter.addedVBox->value();
+
     ui_Filter.close();
 }
-void MainWindow::ok_pixel_cerrar(){
-    Datos_Kernel.New_DataList[0]=ui_pixel.newPixelBox1->value();
-    Datos_Kernel.New_DataList[1]=ui_pixel.newPixelBox2->value();
-    Datos_Kernel.New_DataList[2]=ui_pixel.newPixelBox3->value();
-    Datos_Kernel.New_DataList[3]=ui_pixel.newPixelBox4->value();
 
-    Datos_Kernel.Ori_DataList[0]=ui_pixel.origPixelBox1->value();
-    Datos_Kernel.Ori_DataList[1]=ui_pixel.origPixelBox2->value();
-    Datos_Kernel.Ori_DataList[2]=ui_pixel.origPixelBox3->value();
-    Datos_Kernel.Ori_DataList[3]=ui_pixel.origPixelBox4->value();
+void MainWindow::ok_pixel_cerrar(){
+    Datos_Pixel.New_DataList[0]=ui_pixel.newPixelBox1->value();
+    Datos_Pixel.New_DataList[1]=ui_pixel.newPixelBox2->value();
+    Datos_Pixel.New_DataList[2]=ui_pixel.newPixelBox3->value();
+    Datos_Pixel.New_DataList[3]=ui_pixel.newPixelBox4->value();
+
+    Datos_Pixel.Ori_DataList[0]=ui_pixel.origPixelBox1->value();
+    Datos_Pixel.Ori_DataList[1]=ui_pixel.origPixelBox2->value();
+    Datos_Pixel.Ori_DataList[2]=ui_pixel.origPixelBox3->value();
+    Datos_Pixel.Ori_DataList[3]=ui_pixel.origPixelBox4->value();
 ui_pixel.close();
 }
+
 void MainWindow::ok_oper_cerrar(){
     ui_Oper.close();
 }
 //CHECKEO HISTOGRAMA
+
 void MainWindow::getNewHistogram(bool start){
     DestHistogram=start;
 }
+
 void MainWindow::getOriHistogram(bool start){
     OriHistogram=start;
 }
+
 //SHOW HISTOGRAM
-void MainWindow::showHistogram(Mat& img, char* name)
+
+void MainWindow::showHistogram(Mat& img, char* name,int valor)
 {
 
     int bins = 256;             // number of bins
@@ -309,76 +330,138 @@ for (int i = 0; i < nc; i++)
             1, 8, 0
         );
     }
+    if(valor == 0)
+    {
+        if(ui->Ori_checkHisogram->isChecked())
+            imshow(nc == 1 ? name : wname[i], canvas[i]);
+        else
+            destroyWindow(name);
+    }else if(valor==1){
+        if(ui->Dest_checkHistogram->isChecked())
+             imshow(nc == 1 ? name : wname[i], canvas[i]);
+        else
+            destroyWindow(name);
+    }
 
-    imshow(nc == 1 ? name : wname[i], canvas[i]);
+
 }
 
 }
+
 //OPERACIONES A REALIZAR
-void MainWindow::thresholding(){
+
+void MainWindow::thresholding(Mat MatrizOrigen,Mat Imagen_Destino){
     double p=(double)ui->thresholdSpinBox->value();
 
-    threshold(grayImage,destGrayImage,p,255,THRESH_BINARY);
+    threshold(MatrizOrigen,Imagen_Destino,p,255,THRESH_BINARY);
 }
-void MainWindow::SuavizadoGaussiano(){
+
+void MainWindow::SuavizadoGaussiano(Mat MatrizOrigen,Mat ImagenDestino){
     double w=(double)ui->gaussWidthBox->value();
     double sigX=w/5;
 
-    GaussianBlur(grayImage,destGrayImage,Size(0,0),sigX);
+    GaussianBlur(MatrizOrigen,ImagenDestino,Size(0,0),sigX);
 }
-void MainWindow::SuavizadoMediana(){
 
-    medianBlur(grayImage,destGrayImage,9);
+void MainWindow::SuavizadoMediana(Mat MatrizOrigen,Mat ImagenDestino){
+
+    medianBlur(MatrizOrigen,ImagenDestino,9);
 }
-void MainWindow::transformPixel(){
-    qDebug()<<Datos_Kernel.New_DataList[0];
-    qDebug()<<Datos_Kernel.Ori_DataList[2];
+
+void MainWindow::transformPixel(Mat MatrizOrigen,Mat ImagenDestino){
+    qDebug()<<Datos_Pixel.New_DataList[0];
+    qDebug()<<Datos_Pixel.Ori_DataList[2];
 }
-void MainWindow::equalize(){
-    equalizeHist(grayImage, destGrayImage);
+
+void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
+    equalizeHist(MatrizOrigen, ImagenDestino);
+}
+
+void MainWindow::LinearFilter(Mat MatrizOrigen,Mat ImagenDestino){
+    ok_filter_cerrar();
+    filter2D(MatrizOrigen,ImagenDestino,0,Datos_K.matrix_kernel,Point(-1,-1),Datos_K.value);
+}
+
+
+void MainWindow::Dilatacion(Mat MatrizOrigen,Mat ImagenDestino){
+    Mat Aux;
+    Aux.create(240,320,CV_8UC1);
+    thresholding(MatrizOrigen,Aux);
+
+    dilate(Aux,ImagenDestino,Mat(), Point(-1,-1), 3);
+}
+
+void MainWindow::Erosion(Mat MatrizOrigen,Mat ImagenDestino){
+    Mat Aux;
+    Aux.create(240,320,CV_8UC1);
+    thresholding(MatrizOrigen,Aux);
+
+    erode(Aux,ImagenDestino,Mat(), Point(-1,-1), 3);
+
 }
 
 //OperOrder
-void MainWindow::OperOrderFunction(){
-//TODO
 
+void MainWindow::OperOrderFunction(Mat MatrizOrigen,Mat MatrizDestino){
+//TODO
+    Mat Aux1,Aux2,Aux3;
+    Aux1.create(240,320,CV_8UC1);
+
+    MatrizOrigen.copyTo(Aux1);
+
+    if(ui_Oper.firstOperCheckBox->isChecked()){
+        int pos1=ui_Oper.operationComboBox1->currentIndex();
+        chooseAction(pos1,Aux1,Aux1);
+    }
+    if(ui_Oper.secondOperCheckBox->isChecked()){
+        int pos2=ui_Oper.operationComboBox2->currentIndex();
+        chooseAction(pos2,Aux1,Aux1);
+    }
+    if(ui_Oper.thirdOperCheckBox->isChecked()){
+        int pos3=ui_Oper.operationComboBox3->currentIndex();
+        chooseAction(pos3,Aux1,Aux1);
+    }
+    if(ui_Oper.fourthOperCheckBox->isChecked()){
+        int pos4=ui_Oper.operationComboBox4->currentIndex();
+        chooseAction(pos4,Aux1,Aux1);
+    }
+    Aux1.copyTo(MatrizDestino);
 }
-void MainWindow::chooseAction(){
-    switch(Action){
+
+void MainWindow::chooseAction(int accion,Mat MatrizOrigen,Mat MatrizDestino){
+
+    switch(accion){
     case 0:
-        transformPixel();
+        transformPixel(MatrizOrigen,MatrizDestino);
         break;
     case 1:
-        thresholding();
+        thresholding(MatrizOrigen,MatrizDestino);
        break;
     case 2:
-        equalize();
+        equalize(MatrizOrigen,MatrizDestino);
         break;
     case 3:
-        SuavizadoGaussiano();
-
+        SuavizadoGaussiano(MatrizOrigen,MatrizDestino);
         break;
     case 4:
-        SuavizadoMediana();
+        SuavizadoMediana(MatrizOrigen,MatrizDestino);
         break;
     case 5:
-
+        LinearFilter(MatrizOrigen,MatrizDestino);
         break;
     case 6:
-
+         Dilatacion(MatrizOrigen,MatrizDestino);
         break;
     case 7:
-
+         Erosion(MatrizOrigen,MatrizDestino);
         break;
     case 8:
-
+         OperOrderFunction(MatrizOrigen,MatrizDestino);
         break;
     case 9:
-        OperOrderFunction();
         break;
     }
 }
-
 
 
 

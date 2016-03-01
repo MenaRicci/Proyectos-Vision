@@ -28,6 +28,11 @@ typedef struct {
     int Ori_DataList[4];
  }Datos_pixel;
 
+typedef struct{
+    Mat matrix_kernel;
+    double value;
+}Datos_Kernel;
+
 
 class PixelTDialog: public QDialog, public Ui::PixelTForm
 {
@@ -92,16 +97,19 @@ private:
 
 
     int Action;
-    Datos_pixel Datos_Kernel;
+    Datos_pixel Datos_Pixel;
+    Datos_Kernel Datos_K;
 
 
 public:
-    void thresholding();
-    void SuavizadoGaussiano();
-    void SuavizadoMediana();
-    void transformPixel();
-    void equalize();
-
+    void thresholding(Mat MatrizOrigen,Mat Imagen_Destino);
+    void SuavizadoGaussiano(Mat MatrizOrigen,Mat Imagen_Destino);
+    void SuavizadoMediana(Mat MatrizOrigen,Mat Imagen_Destino);
+    void transformPixel(Mat MatrizOrigen,Mat Imagen_Destino);
+    void equalize(Mat MatrizOrigen,Mat Imagen_Destino);
+    void LinearFilter(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Erosion(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Dilatacion(Mat MatrizOrigen,Mat Imagen_Destino);
 
 public slots:
     void compute();
@@ -121,14 +129,13 @@ public slots:
     void ok_oper_cerrar();
 
     void obtener_accion(int indice);
-    void OperOrderFunction();
-    void chooseAction();
+    void OperOrderFunction(Mat MatrizOrigen, Mat MatrizDestino);
+    void chooseAction(int accion,Mat MatrizOrigen, Mat MatrizDestino);
 
     void getOriHistogram(bool start);
     void getNewHistogram(bool start);
 
-    void showHistogram(Mat& img, char* name);
-
+    void showHistogram(Mat& img, char* name, int valor);
 
 
 };
