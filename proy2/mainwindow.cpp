@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    Action=-1;
+    Action=0;
 
     cap = new VideoCapture(0);
     if(!cap->isOpened())
@@ -28,8 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
-    Datos_K.matrix_kernel.create(3,3,CV_8UC1);
+    Datos_K.matrix_kernel.create(3,3,CV_8SC1);
 
+    TLUT.resize(256);
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
@@ -259,7 +260,7 @@ void MainWindow::ok_filter_cerrar(){
     ui_Filter.close();
 }
 
-void MainWindow::ok_pixel_cerrar(){
+void MainWindow::saveDataPixel(){
     Datos_Pixel.New_DataList[0]=ui_pixel.newPixelBox1->value();
     Datos_Pixel.New_DataList[1]=ui_pixel.newPixelBox2->value();
     Datos_Pixel.New_DataList[2]=ui_pixel.newPixelBox3->value();
@@ -269,7 +270,11 @@ void MainWindow::ok_pixel_cerrar(){
     Datos_Pixel.Ori_DataList[1]=ui_pixel.origPixelBox2->value();
     Datos_Pixel.Ori_DataList[2]=ui_pixel.origPixelBox3->value();
     Datos_Pixel.Ori_DataList[3]=ui_pixel.origPixelBox4->value();
-ui_pixel.close();
+}
+
+void MainWindow::ok_pixel_cerrar(){
+    saveDataPixel();
+    ui_pixel.close();
 }
 
 void MainWindow::ok_oper_cerrar(){
@@ -373,9 +378,45 @@ void MainWindow::SuavizadoMediana(Mat MatrizOrigen,Mat ImagenDestino){
     medianBlur(MatrizOrigen,ImagenDestino,9);
 }
 
+
+void MainWindow::calculoLUT(){
+    //tramos
+    int tr1=ui_pixel.origPixelBox2->value();
+    int tr2=ui_pixel.origPixelBox3->value();
+    //int tr3=ui_pixel.origPixelBox4->value();
+
+    //valores S
+    int s0=ui_pixel.newPixelBox1->value();
+    int s1=ui_pixel.newPixelBox2->value();
+    int s2=ui_pixel.newPixelBox3->value();
+    int s3=ui_pixel.newPixelBox4->value();
+
+    int i;
+    float denominadorS,denominadorR;
+
+    denominadorS=s1-s0;
+    denominadorR=tr1-0;
+    for(i=0;i<tr1;i++){
+        TLUT[i]=(i/denominadorR)*denominadorS+s0;
+    }
+
+    denominadorS=s2-s1;
+    denominadorR=tr2-tr1;
+    for(i=tr1;i<tr2;i++){
+        TLUT[i]=((i-tr1)/denominadorR)*denominadorS+s1;
+    }
+
+    denominadorS=s3-s2;
+    denominadorR=255-tr2;
+    for(i=tr2;i<=255;i++){
+        TLUT[i]=((i-tr2)/denominadorR)*denominadorS+s2;
+    }
+
+}
+
 void MainWindow::transformPixel(Mat MatrizOrigen,Mat ImagenDestino){
-    qDebug()<<Datos_Pixel.New_DataList[0];
-    qDebug()<<Datos_Pixel.Ori_DataList[2];
+    calculoLUT();
+    cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
 }
 
 void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
@@ -384,6 +425,7 @@ void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
 
 void MainWindow::LinearFilter(Mat MatrizOrigen,Mat ImagenDestino){
     saveDataFilter();
+
 
     filter2D(MatrizOrigen,ImagenDestino,0,Datos_K.matrix_kernel,Point(-1,-1),Datos_K.value);
 }

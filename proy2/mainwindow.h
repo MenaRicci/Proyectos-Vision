@@ -26,7 +26,6 @@ namespace Ui {
 typedef struct {
     int New_DataList[4];
     int Ori_DataList[4];
-    int p;
  }Datos_pixel;
 
 typedef struct{
@@ -96,6 +95,7 @@ private:
     Mat imgHistograma;
     CvHistogram* hist;
 
+    std::vector<uchar> TLUT;
 
     int Action;
     Datos_pixel Datos_Pixel;
@@ -129,6 +129,8 @@ public slots:
     void ok_pixel_cerrar();
     void ok_oper_cerrar();
     void saveDataFilter();
+    void saveDataPixel();
+    void calculoLUT();
 
     void obtener_accion(int indice);
     void OperOrderFunction(Mat MatrizOrigen, Mat MatrizDestino);
