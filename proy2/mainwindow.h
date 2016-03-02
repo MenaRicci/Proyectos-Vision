@@ -26,6 +26,7 @@ namespace Ui {
 typedef struct {
     int New_DataList[4];
     int Ori_DataList[4];
+    int p;
  }Datos_pixel;
 
 typedef struct{
