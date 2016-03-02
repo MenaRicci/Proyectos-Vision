@@ -131,6 +131,8 @@ public slots:
     void saveDataFilter();
     void saveDataPixel();
     void calculoLUT();
+    void setOptionLUT();
+    void hiddenValue(bool state);
 
     void obtener_accion(int indice);
     void OperOrderFunction(Mat MatrizOrigen, Mat MatrizDestino);

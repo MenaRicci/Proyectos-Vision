@@ -414,7 +414,38 @@ void MainWindow::calculoLUT(){
 
 }
 
+void MainWindow::hiddenValue(bool state){
+       ui_pixel.newPixelBox1->setHidden(state);
+       ui_pixel.newPixelBox2->setHidden(state);
+       ui_pixel.newPixelBox3->setHidden(state);
+       ui_pixel.newPixelBox4->setHidden(state);
+}
+
+void MainWindow::setOptionLUT(){
+    int action=ui_pixel.comboBox->currentIndex();
+
+    switch (action) {
+    case 1:
+        hiddenValue(false);
+        ui_pixel.newPixelBox1->setValue(0);
+        ui_pixel.newPixelBox2->setValue(85);
+        ui_pixel.newPixelBox3->setValue(170);
+        ui_pixel.newPixelBox4->setValue(255);
+        break;
+    case 2:
+        hiddenValue(false);
+        ui_pixel.newPixelBox1->setValue(255);
+        ui_pixel.newPixelBox2->setValue(170);
+        ui_pixel.newPixelBox3->setValue(85);
+        ui_pixel.newPixelBox4->setValue(0);
+        break;
+    default:
+        break;
+    }
+}
+
 void MainWindow::transformPixel(Mat MatrizOrigen,Mat ImagenDestino){
+    setOptionLUT();
     calculoLUT();
     cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
 }
