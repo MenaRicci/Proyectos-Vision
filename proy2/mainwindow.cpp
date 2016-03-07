@@ -430,9 +430,8 @@ void MainWindow::Logarithm(Mat Matriz_Origen,Mat Matriz_Destino){
 
 
             // Matriz_Destino.col(i).row(j)=log(atof(data));
+            //----------------------------------------------------------------*/
 
-            //----------------------------------------------------------------
-*/
 
         }
     }
