@@ -112,6 +112,11 @@ public:
     void LinearFilter(Mat MatrizOrigen,Mat Imagen_Destino);
     void Erosion(Mat MatrizOrigen,Mat Imagen_Destino);
     void Dilatacion(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Apertura(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Cierre(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Gradiente(Mat MatrizOrigen,Mat Imagen_Destino);
+    void BlackHat(Mat MatrizOrigen,Mat Imagen_Destino);
+    void Logarithm(Mat Matriz_Origen,Mat Matriz_Destino);
 
 public slots:
     void compute();
@@ -132,7 +137,7 @@ public slots:
     void saveDataFilter();
     void saveDataPixel();
     void calculoLUT();
-    void setOptionLUT();
+    int setOptionLUT();
     void hiddenValue(bool state);
 
     void obtener_accion(int indice);

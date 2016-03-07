@@ -168,6 +168,26 @@
     </item>
     <item>
      <property name="text">
+      <string>Aperture</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Gradiente</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>BlackHat</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
       <string>Apply several...</string>
      </property>
     </item>

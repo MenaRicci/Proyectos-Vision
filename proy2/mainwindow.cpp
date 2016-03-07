@@ -421,7 +421,26 @@ void MainWindow::hiddenValue(bool state){
        ui_pixel.newPixelBox4->setHidden(state);
 }
 
-void MainWindow::setOptionLUT(){
+void MainWindow::Logarithm(Mat Matriz_Origen,Mat Matriz_Destino){
+   uchar tmp=0;
+    for (int i = 0; i < Matriz_Origen.cols; ++i) {
+        for (int j = 0; j < Matriz_Origen.rows; ++j) {
+            /*----------------------------------------------------------------\\
+            //tmp=Matriz_Origen.col(i).row(j);
+
+
+            // Matriz_Destino.col(i).row(j)=log(atof(data));
+
+            //----------------------------------------------------------------
+*/
+
+        }
+    }
+
+}
+
+
+int MainWindow::setOptionLUT(){
     int action=ui_pixel.comboBox->currentIndex();
 
     switch (action) {
@@ -439,15 +458,27 @@ void MainWindow::setOptionLUT(){
         ui_pixel.newPixelBox3->setValue(85);
         ui_pixel.newPixelBox4->setValue(0);
         break;
+
     default:
         break;
     }
+    return action;
 }
 
 void MainWindow::transformPixel(Mat MatrizOrigen,Mat ImagenDestino){
-    setOptionLUT();
-    calculoLUT();
-    cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
+    int valor=setOptionLUT();
+    if(valor<3){
+        calculoLUT();
+        cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
+    }
+    else{
+        switch(valor){
+        case 3:
+
+            break;
+        }
+
+    }
 }
 
 void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
@@ -474,11 +505,34 @@ void MainWindow::Erosion(Mat MatrizOrigen,Mat ImagenDestino){
     Mat Aux;
     Aux.create(240,320,CV_8UC1);
     thresholding(MatrizOrigen,Aux);
-
-    erode(Aux,ImagenDestino,Mat(), Point(-1,-1), 3);
-
+    erode(Aux,ImagenDestino,Mat() ,Point(-1,-1), 3);
 }
 
+void MainWindow::Apertura(Mat MatrizOrigen, Mat Imagen_Destino){
+    Mat Aux;
+    Aux.create(240,320,CV_8UC1);
+    Erosion(MatrizOrigen,Aux);
+    Dilatacion(Aux,Imagen_Destino);
+}
+void MainWindow::Cierre(Mat MatrizOrigen, Mat Imagen_Destino){
+    Mat Aux;
+    Aux.create(240,320,CV_8UC1);
+    Dilatacion(MatrizOrigen,Aux);
+    Erosion(Aux,Imagen_Destino);
+}
+void MainWindow::Gradiente(Mat MatrizOrigen, Mat Imagen_Destino){
+Mat Aux;
+Aux.create(240,320,CV_8UC1);
+thresholding(MatrizOrigen,Aux);
+morphologyEx(Aux,Imagen_Destino,4,Mat(),Point(-1,-1), 3);
+}
+
+void MainWindow::BlackHat(Mat MatrizOrigen, Mat Imagen_Destino){
+Mat Aux;
+Aux.create(240,320,CV_8UC1);
+thresholding(MatrizOrigen,Aux);
+morphologyEx(Aux,Imagen_Destino,6,Mat(),Point(-1,-1), 3);
+}
 //OperOrder
 
 void MainWindow::OperOrderFunction(Mat MatrizOrigen,Mat MatrizDestino){
@@ -506,6 +560,7 @@ void MainWindow::OperOrderFunction(Mat MatrizOrigen,Mat MatrizDestino){
     }
     Aux1.copyTo(MatrizDestino);
 }
+
 
 void MainWindow::chooseAction(int accion,Mat MatrizOrigen,Mat MatrizDestino){
 
@@ -535,9 +590,20 @@ void MainWindow::chooseAction(int accion,Mat MatrizOrigen,Mat MatrizDestino){
          Erosion(MatrizOrigen,MatrizDestino);
         break;
     case 8:
-         OperOrderFunction(MatrizOrigen,MatrizDestino);
+        Apertura(MatrizOrigen,MatrizDestino);
         break;
     case 9:
+        Cierre(MatrizOrigen,MatrizDestino);
+        break;
+    case 10:
+        Gradiente(MatrizOrigen,MatrizDestino);
+        break;
+    case 11:
+        BlackHat(MatrizOrigen,MatrizDestino);
+        break;
+
+    default:
+         OperOrderFunction(MatrizOrigen,MatrizDestino);
         break;
     }
 }
