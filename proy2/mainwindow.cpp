@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->Dest_checkHistogram, SIGNAL(clicked(bool)), this, SLOT(getNewHistogram(bool)));
     connect(ui->operationComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(obtener_accion(int)));
+
+    connect(ui->StrucElemt,SIGNAL(clicked()),this,SLOT(abrirElement()));
+    connect(ui_StrEle.okButton,SIGNAL(clicked()),this,SLOT(ok_strEle_cerrar()));
     timer.start(60);
 
     OriHistogram=false;
@@ -88,10 +91,9 @@ void MainWindow::compute()
 
     }
 
-   showHistogram(grayImage,"Histograma Original",0);
+     showHistogram(grayImage,"Histograma Original",0);
 
-   showHistogram(destGrayImage,"Histograma Destino",1);
-
+     showHistogram(destGrayImage, "Histograma Destino",1);
 
 /*Elegir que accion ejecuta dependiendo del combo box*/
     chooseAction(Action,grayImage,destGrayImage);
@@ -236,6 +238,10 @@ ui_Oper.show();
 void MainWindow::abrirPixel(){
 ui_pixel.show();
 }
+void MainWindow::abrirElement(){
+ui_StrEle.show();
+}
+
 void MainWindow::saveDataFilter(){
 
     Datos_K.matrix_kernel.row(0).col(0)=ui_Filter.kernelBox11->value();
@@ -276,7 +282,9 @@ void MainWindow::ok_pixel_cerrar(){
     saveDataPixel();
     ui_pixel.close();
 }
-
+void MainWindow::ok_strEle_cerrar(){
+    ui_StrEle.close();
+}
 void MainWindow::ok_oper_cerrar(){
     ui_Oper.close();
 }
@@ -292,7 +300,7 @@ void MainWindow::getOriHistogram(bool start){
 
 //SHOW HISTOGRAM
 
-void MainWindow::showHistogram(Mat& img, char* name,int valor)
+void MainWindow::showHistogram(Mat& img, String name,int valor)
 {
 
     int bins = 256;             // number of bins
@@ -302,7 +310,8 @@ void MainWindow::showHistogram(Mat& img, char* name,int valor)
     int hmax[3] = {0,0,0};      // peak value for each histogram
 
     // The rest of the code will be placed here
-for (int i = 0; i < hist.size(); i++)
+    int size=hist.size();
+for (int i = 0; i <size ; i++)
     hist[i] = Mat::zeros(1, bins, CV_32SC1);
 for (int i = 0; i < img.rows; i++)
 {
@@ -421,21 +430,22 @@ void MainWindow::hiddenValue(bool state){
        ui_pixel.newPixelBox4->setHidden(state);
 }
 
-void MainWindow::Logarithm(Mat Matriz_Origen,Mat Matriz_Destino){
-   uchar tmp=0;
-    for (int i = 0; i < Matriz_Origen.cols; ++i) {
-        for (int j = 0; j < Matriz_Origen.rows; ++j) {
-            /*----------------------------------------------------------------\\
-            //tmp=Matriz_Origen.col(i).row(j);
+void MainWindow::Logarithm(){
+   float aux;
+   for(int i=0;i<=255;i++){
+      aux=(i/255.0)+1;
+      TLUT[i]=255*log(aux);
+   }
 
+}
 
-            // Matriz_Destino.col(i).row(j)=log(atof(data));
-            //----------------------------------------------------------------*/
-
-
-        }
+void MainWindow::Potencia(){
+    double pot=ui_pixel.potencia->value();
+    double aux;
+    for(int i=0;i<=255;i++){
+        aux=(i/255.0);
+        TLUT[i]=255*pow(aux,pot);
     }
-
 }
 
 
@@ -443,12 +453,16 @@ int MainWindow::setOptionLUT(){
     int action=ui_pixel.comboBox->currentIndex();
 
     switch (action) {
-    case 1:
+    case 0:
         hiddenValue(false);
         ui_pixel.newPixelBox1->setValue(0);
         ui_pixel.newPixelBox2->setValue(85);
         ui_pixel.newPixelBox3->setValue(170);
         ui_pixel.newPixelBox4->setValue(255);
+        calculoLUT();
+        break;
+    case 1:
+        calculoLUT();
         break;
     case 2:
         hiddenValue(false);
@@ -456,28 +470,23 @@ int MainWindow::setOptionLUT(){
         ui_pixel.newPixelBox2->setValue(170);
         ui_pixel.newPixelBox3->setValue(85);
         ui_pixel.newPixelBox4->setValue(0);
+        calculoLUT();
         break;
 
-    default:
+    case 3:
+        Logarithm();
+        break;
+    case 4:
+        Potencia();
         break;
     }
     return action;
 }
 
 void MainWindow::transformPixel(Mat MatrizOrigen,Mat ImagenDestino){
-    int valor=setOptionLUT();
-    if(valor<3){
-        calculoLUT();
-        cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
-    }
-    else{
-        switch(valor){
-        case 3:
+    setOptionLUT();
+    cv::LUT(MatrizOrigen,TLUT,ImagenDestino);
 
-            break;
-        }
-
-    }
 }
 
 void MainWindow::equalize(Mat MatrizOrigen,Mat ImagenDestino){
@@ -491,20 +500,62 @@ void MainWindow::LinearFilter(Mat MatrizOrigen,Mat ImagenDestino){
     filter2D(MatrizOrigen,ImagenDestino,0,Datos_K.matrix_kernel,Point(-1,-1),Datos_K.value);
 }
 
+void MainWindow::getElement(){
+    int val=ui_StrEle.comboBox->currentIndex();
+    int size=ui_StrEle.spinBox->value();
+    int type;
+    switch (val) {
+    case 0:
+        type=MORPH_RECT;
+        element=getStructuringElement(type,Size(size,size),Point(-1,-1));
+        break;
+    case 1:
+        type=MORPH_CROSS;
+        element=getStructuringElement(type,Size(size,size),Point(-1,-1));
+        break;
+    case 2:
+        type=MORPH_ELLIPSE;
+        element=getStructuringElement(type,Size(size,size),Point(-1,-1));
+        break;
+    case 3:
+        element=Mat::ones(5, 5, CV_8UC1);
+
+        *element.row(0).col(0).data=0;
+        *element.row(0).col(1).data=0;
+        *element.row(1).col(0).data=0;
+
+        *element.row(0).col(4).data=0;
+        *element.row(0).col(3).data=0;
+        *element.row(1).col(4).data=0;
+
+        *element.row(3).col(0).data=0;
+        *element.row(4).col(0).data=0;
+        *element.row(4).col(1).data=0;
+
+        *element.row(4).col(4).data=0;
+        *element.row(3).col(4).data=0;
+        *element.row(4).col(3).data=0;
+        break;
+
+    }
+
+
+}
 
 void MainWindow::Dilatacion(Mat MatrizOrigen,Mat ImagenDestino){
     Mat Aux;
     Aux.create(240,320,CV_8UC1);
     thresholding(MatrizOrigen,Aux);
-
-    dilate(Aux,ImagenDestino,Mat(), Point(-1,-1), 3);
+    getElement();
+    dilate(Aux,ImagenDestino,element, Point(-1,-1), 3);
 }
 
 void MainWindow::Erosion(Mat MatrizOrigen,Mat ImagenDestino){
     Mat Aux;
     Aux.create(240,320,CV_8UC1);
     thresholding(MatrizOrigen,Aux);
-    erode(Aux,ImagenDestino,Mat() ,Point(-1,-1), 3);
+    getElement();
+    erode(Aux,ImagenDestino,element ,Point(-1,-1), 3);
 }
 
 void MainWindow::Apertura(Mat MatrizOrigen, Mat Imagen_Destino){
@@ -523,20 +574,22 @@ void MainWindow::Gradiente(Mat MatrizOrigen, Mat Imagen_Destino){
 Mat Aux;
 Aux.create(240,320,CV_8UC1);
 thresholding(MatrizOrigen,Aux);
-morphologyEx(Aux,Imagen_Destino,4,Mat(),Point(-1,-1), 3);
+getElement();
+morphologyEx(Aux,Imagen_Destino,4,element,Point(-1,-1), 3);
 }
 
 void MainWindow::BlackHat(Mat MatrizOrigen, Mat Imagen_Destino){
 Mat Aux;
 Aux.create(240,320,CV_8UC1);
 thresholding(MatrizOrigen,Aux);
-morphologyEx(Aux,Imagen_Destino,6,Mat(),Point(-1,-1), 3);
+getElement();
+morphologyEx(Aux,Imagen_Destino,6,element,Point(-1,-1), 3);
 }
 //OperOrder
 
 void MainWindow::OperOrderFunction(Mat MatrizOrigen,Mat MatrizDestino){
 //TODO
-    Mat Aux1,Aux2,Aux3;
+    Mat Aux1;
     Aux1.create(240,320,CV_8UC1);
 
     MatrizOrigen.copyTo(Aux1);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>860</width>
-    <height>398</height>
+    <width>867</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,10 +105,10 @@
   <widget class="QFrame" name="processingFrame">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>290</y>
+     <x>10</x>
+     <y>310</y>
      <width>831</width>
-     <height>91</height>
+     <height>101</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -308,6 +308,19 @@
      <number>3</number>
     </property>
    </widget>
+   <widget class="QPushButton" name="StrucElemt">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>10</y>
+      <width>181</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Structural Element</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QPushButton" name="saveButton">
    <property name="geometry">
@@ -357,11 +370,23 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>270</y>
-     <width>221</width>
-     <height>31</height>
+     <x>260</x>
+     <y>260</y>
+     <width>231</width>
+     <height>41</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Abyssinica SIL</family>
+     <pointsize>6</pointsize>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="mouseTracking">
+    <bool>true</bool>
    </property>
    <property name="autoFillBackground">
     <bool>true</bool>

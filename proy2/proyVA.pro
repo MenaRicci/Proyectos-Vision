@@ -21,4 +21,5 @@ LIBS += -L/usr/lib/x86_64-linux-gnu -L/usr/local/lib -lQGLViewer -lopencv_imgpro
 FORMS    += mainwindow.ui \
     lFilterForm.ui \
     pixelTForm.ui \
-    operOrderForm.ui
+    operOrderForm.ui \
+    StructElement.ui

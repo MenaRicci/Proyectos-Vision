@@ -239,12 +239,12 @@
    </property>
    <item>
     <property name="text">
-     <string>Personalizado</string>
+     <string>Identidad</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Identidad</string>
+     <string>Personalizado</string>
     </property>
    </item>
    <item>
@@ -257,6 +257,43 @@
      <string>Logaritmo</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>Potencia</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>100</y>
+     <width>66</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Potencia</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="potencia">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>130</y>
+     <width>74</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <double>0.040000000000000</double>
+   </property>
+   <property name="maximum">
+    <double>30.000000000000000</double>
+   </property>
+   <property name="value">
+    <double>1.000000000000000</double>
+   </property>
   </widget>
  </widget>
  <resources/>

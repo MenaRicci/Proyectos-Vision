@@ -14,6 +14,7 @@
 #include <ui_pixelTForm.h>
 #include <ui_operOrderForm.h>
 #include <ui_lFilterForm.h>
+#include <ui_StructElement.h>
 
 
 using namespace cv;
@@ -67,6 +68,15 @@ public: operOrderDialog(QDialog *parent=0): QDialog(parent){
     }
 };
 
+class StructElementDialog: public QDialog, public Ui::StructElement
+{
+    Q_OBJECT
+
+public: StructElementDialog(QDialog *parent=0): QDialog(parent){
+        setupUi(this);
+    }
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -80,12 +90,14 @@ private:
     IFilterDialog ui_Filter;
     operOrderDialog ui_Oper;
     PixelTDialog ui_pixel;
+    StructElementDialog ui_StrEle;
 
     QTimer timer;
 
     VideoCapture *cap;
     RCDraw *visorS, *visorD;
     QImage *imgS, *imgD;
+    Mat element;
     Mat colorImage, grayImage, destColorImage, destGrayImage;
     Mat gray2ColorImage, destGray2ColorImage;
     bool capture, showColorImage, winSelected, loadbool,savebool;
@@ -110,13 +122,15 @@ public:
     void transformPixel(Mat MatrizOrigen,Mat Imagen_Destino);
     void equalize(Mat MatrizOrigen,Mat Imagen_Destino);
     void LinearFilter(Mat MatrizOrigen,Mat Imagen_Destino);
+    void getElement();
     void Erosion(Mat MatrizOrigen,Mat Imagen_Destino);
     void Dilatacion(Mat MatrizOrigen,Mat Imagen_Destino);
     void Apertura(Mat MatrizOrigen,Mat Imagen_Destino);
     void Cierre(Mat MatrizOrigen,Mat Imagen_Destino);
     void Gradiente(Mat MatrizOrigen,Mat Imagen_Destino);
     void BlackHat(Mat MatrizOrigen,Mat Imagen_Destino);
-    void Logarithm(Mat Matriz_Origen,Mat Matriz_Destino);
+    void Logarithm();
+    void Potencia();
 
 public slots:
     void compute();
@@ -130,10 +144,12 @@ public slots:
     void abrir_Filter();
     void abrirOperOrder();
     void abrirPixel();
+    void abrirElement();
 
     void ok_filter_cerrar();
     void ok_pixel_cerrar();
     void ok_oper_cerrar();
+    void ok_strEle_cerrar();
     void saveDataFilter();
     void saveDataPixel();
     void calculoLUT();
@@ -147,7 +163,7 @@ public slots:
     void getOriHistogram(bool start);
     void getNewHistogram(bool start);
 
-    void showHistogram(Mat& img, char* name, int valor);
+    void showHistogram(Mat& img, String name, int valor);
 
 
 };
