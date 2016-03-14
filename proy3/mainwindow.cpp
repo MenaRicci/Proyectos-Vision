@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     imgD = new QImage(320,240, QImage::Format_RGB888);
     visorD = new RCDraw(320,240, imgD, ui->imageFrameD);
 
-
+    cont1=0;cont2=0;cont3=0;
 
     colorImage.create(240,320,CV_8UC3);
     grayImage.create(240,320,CV_8UC1);
@@ -32,10 +32,15 @@ MainWindow::MainWindow(QWidget *parent) :
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
 
+    conjuntoImagen1.insert(conjuntoImagen1.begin(),15,Black_Gray_Image);
+
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
     connect(ui->colorButton,SIGNAL(clicked(bool)),this,SLOT(change_color_gray(bool)));
     connect(ui->AddObjIma,SIGNAL(clicked()),this,SLOT(set_Image()));
+    connect(ui->DelObjIma,SIGNAL(clicked()),this,SLOT(deleteImageInSet()));
+    connect(ui->horizontalSlider,SIGNAL(valueChanged(int)),this,SLOT(changeImage()));
+    connect(ui->SelectComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(changeImage()));
 
     connect(visorS,SIGNAL(windowSelected(QPointF, int, int)),this,SLOT(selectWindow(QPointF, int, int)));
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
@@ -66,7 +71,7 @@ void MainWindow::compute()
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
 
     }
-
+    changeImage();
     if(showColorImage)
     {
         memcpy(imgS->bits(), colorImage.data , 320*240*3*sizeof(uchar));
@@ -107,50 +112,6 @@ void MainWindow::start_stop_capture(bool start)
         capture = false;
     }
 }
-void MainWindow::set_Image()
-{
- if(winSelected){
-    // ui->textEdit->setText("Hola");
-//colorImage.copyTo();
-
-   //  destColorImage.resize(colorImage.rowRange(imageWindow.x,imageWindow.width).colRange(imageWindow.y,imageWindow.height));
-
-
-    int centro_wdt_image=imageWindow.width/2;
-    int centro_hgt_image=imageWindow.height/2;
-    //ui->textEdit->setText(centro_hgt_image);
-    printf("Altura : %d\nn",centro_hgt_image);
-
-    int origen_x =160-centro_wdt_image;
-    int origen_y =120-centro_hgt_image;
-
-
-    int fin_x =origen_x+imageWindow.width;
-    int fin_y =origen_y+imageWindow.height;
-
-
-    destColorImage=Black_Color_Image.clone();
-    destGrayImage=Black_Gray_Image.clone();
-
-if(showColorImage){
-    Mat cuadroImagen=colorImage.colRange(imageWindow.x,imageWindow.x+imageWindow.width).rowRange(imageWindow.y,imageWindow.y+imageWindow.height);
-
-    cuadroImagen.copyTo(destColorImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
-}
-else{
-    Mat cuadroImagen=grayImage.colRange(imageWindow.x,imageWindow.x+imageWindow.width).rowRange(imageWindow.y,imageWindow.y+imageWindow.height);
-
-        cuadroImagen.copyTo(destGrayImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
-}
-   // cuadroImagen.copyTo(destGrayImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
- }
-
- else{
-     destColorImage=colorImage.clone();
-     destGrayImage=grayImage.clone();
- }
-}
-
 void MainWindow::change_color_gray(bool color)
 {
     if(color)
@@ -189,10 +150,131 @@ void MainWindow::selectWindow(QPointF p, int w, int h)
 
     }
 }
-
 void MainWindow::deselectWindow()
 {
     winSelected = false;
 }
+void MainWindow::set_Image()
+{
+ if(winSelected){
+    // ui->textEdit->setText("Hola");
+//colorImage.copyTo();
 
+   //  destColorImage.resize(colorImage.rowRange(imageWindow.x,imageWindow.width).colRange(imageWindow.y,imageWindow.height));
+
+
+    int centro_wdt_image=imageWindow.width/2;
+    int centro_hgt_image=imageWindow.height/2;
+
+    int origen_x =160-centro_wdt_image;
+    int origen_y =120-centro_hgt_image;
+
+
+    int fin_x =origen_x+imageWindow.width;
+    int fin_y =origen_y+imageWindow.height;
+
+
+    destColorImage=Black_Color_Image.clone();
+    destGrayImage=Black_Gray_Image.clone();
+
+if(showColorImage){
+    Mat cuadroImagen=colorImage.colRange(imageWindow.x,imageWindow.x+imageWindow.width).rowRange(imageWindow.y,imageWindow.y+imageWindow.height);
+
+    cuadroImagen.copyTo(destColorImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
+}
+else{
+    Mat cuadroImagen=grayImage.colRange(imageWindow.x,imageWindow.x+imageWindow.width).rowRange(imageWindow.y,imageWindow.y+imageWindow.height);
+
+        cuadroImagen.copyTo(destGrayImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
+}
+   // cuadroImagen.copyTo(destGrayImage.colRange(origen_x,fin_x).rowRange(origen_y,fin_y));
+ }
+
+ else{
+     destColorImage=colorImage.clone();
+     destGrayImage=grayImage.clone();
+ }
+ saveImageInSet();
+}
+void MainWindow::saveImageInSet(){
+    Mat Imagen;
+    Imagen=destGrayImage.clone();
+    switch (ui->SelectComboBox->currentIndex()) {
+    case 0 : //OBJETO 1
+        conjuntoImagen1.insert(conjuntoImagen1.begin()+0+cont1,Imagen);
+        cont1++;
+        qDebug()<<"Contador1: "<<cont1;
+        break;
+    case 1: //OBJETO 2
+        conjuntoImagen1.insert(conjuntoImagen1.begin()+5+cont2,Imagen);
+        cont2++;
+         qDebug()<<"Contador2: "<<cont2;
+        break;
+    case 2: //OBJETO 3
+        conjuntoImagen1.insert(conjuntoImagen1.begin()+10+cont3,Imagen);
+        cont3++;
+        qDebug()<<"Contador3: "<<cont3;
+
+        break;
+    default:
+
+        break;
+    }
+
+}
+void MainWindow::changeImage(){
+     Mat Image;
+     //qDebug()<<"Num"<<pos;
+    int posicion= ui->horizontalSlider->value();
+    switch (ui->SelectComboBox->currentIndex()) {
+    case 0:
+            Image=*(conjuntoImagen1.begin()+ posicion -1);
+            destGrayImage=Image.clone();
+
+        break;
+    case 1:
+
+            Image=*(conjuntoImagen1.begin()+posicion+4);
+            destGrayImage=Image.clone();
+
+        break;
+    case 2:
+            Image=*(conjuntoImagen1.begin()+posicion+9);
+            destGrayImage=Image.clone();
+
+        break;
+    }
+
+}
+
+void MainWindow::deleteImageInSet(){
+   // Mat Imagen;
+   // Imagen=destGrayImage.clone();
+    switch (ui->SelectComboBox->currentIndex()) {
+    case 0 : //OBJETO 1
+        if(cont1!=0){
+            conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()-1);
+            cont1--;
+            qDebug()<<"Contador1: "<<cont1;
+        }
+        break;
+    case 1: //OBJETO 2
+        if(cont2!=0){
+            conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+4);
+            cont2--;
+            qDebug()<<"Contador2: "<<cont2;
+        }
+        break;
+    case 2: //OBJETO 3
+        conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+9);
+        cont3--;
+        qDebug()<<"Contador3: "<<cont3;
+
+        break;
+    default:
+
+        break;
+    }
+
+}
 

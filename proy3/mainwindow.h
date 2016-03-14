@@ -42,6 +42,8 @@ private:
     bool capture, showColorImage, winSelected,warpeded, clicked;
     bool click, savebool, loadbool,resizebool,enlargebool;
     Rect imageWindow;
+    std::vector<Mat> conjuntoImagen1 ;
+    int cont1,cont2,cont3;
 
 
 public slots:
@@ -49,8 +51,11 @@ public slots:
     void start_stop_capture(bool start);
     void change_color_gray(bool color);
     void set_Image();
+    void saveImageInSet();
     void selectWindow(QPointF p, int w, int h);
     void deselectWindow();
+    void changeImage();
+    void deleteImageInSet();
 
 };
 
