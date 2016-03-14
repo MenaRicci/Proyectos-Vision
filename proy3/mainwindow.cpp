@@ -252,23 +252,25 @@ void MainWindow::deleteImageInSet(){
    // Imagen=destGrayImage.clone();
     switch (ui->SelectComboBox->currentIndex()) {
     case 0 : //OBJETO 1
-        if(cont1!=0){
+        if(cont1>0 && (ui->horizontalSlider->value()<=cont1)){
             conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()-1);
             cont1--;
             qDebug()<<"Contador1: "<<cont1;
         }
         break;
     case 1: //OBJETO 2
-        if(cont2!=0){
+        if(cont2>0 && (ui->horizontalSlider->value()<=cont2)){
             conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+4);
             cont2--;
             qDebug()<<"Contador2: "<<cont2;
         }
         break;
     case 2: //OBJETO 3
+        if(cont3>0 && (ui->horizontalSlider->value()<=cont3)){
         conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+9);
         cont3--;
         qDebug()<<"Contador3: "<<cont3;
+        }
 
         break;
     default:
