@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     imgD = new QImage(320,240, QImage::Format_RGB888);
     visorD = new RCDraw(320,240, imgD, ui->imageFrameD);
 
-    cont1=0;cont2=0;cont3=0;
+
 
     colorImage.create(240,320,CV_8UC3);
     grayImage.create(240,320,CV_8UC1);
@@ -48,9 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     listaContadores.insert(listaContadores.begin(),3,0);
     qDebug()<<listaContadores[2];
     timer.start(60);
-
-
-
     orb=ORB();
 
 }
@@ -221,6 +218,7 @@ void MainWindow::changeImage(){
         destGrayImage=Black_Gray_Image.clone();
 
 }
+
 void MainWindow::deleteImageInSet(){
 
     int objeto=ui->SelectComboBox->currentIndex();
@@ -233,3 +231,22 @@ void MainWindow::deleteImageInSet(){
     }
 }
 
+void MainWindow::Match_ORB(){
+
+    orb.detect(grayImage,ListaPuntosOrigen);
+    orb.compute(grayImage,ListaPuntosOrigen,descritorOrigen);
+    //Comprobar si se ha modificado la lista de imagenes de un objeto
+    for (int i = 0; i < ui->SelectComboBox->count() ; ++i) {
+        for (int j = 0; j < listaContadores[i] ; ++j) {
+            std::vector<KeyPoint> puntos;
+            orb.detect(ListaObjetosImagenes[i][j],puntos);
+            ListaPuntosImagenes[i][j]=puntos;
+            Mat descriptor;
+            orb.compute(ListaObjetosImagenes[i][j],puntos,descriptor);
+            listaDescriptores[i][j]=descriptor.clone();
+        }
+    }
+
+
+
+}

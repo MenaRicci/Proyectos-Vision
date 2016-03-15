@@ -48,8 +48,11 @@ private:
 
     std::vector<std::vector<Mat> > ListaObjetosImagenes;
     std::vector<std::vector<std::vector<KeyPoint> > > ListaPuntosImagenes;
+    std::vector<KeyPoint> ListaPuntosOrigen;
+    Mat descritorOrigen;
+    std::vector<std::vector<Mat> > listaDescriptores;
+    std::vector<DMatch> matches;
     std::vector<int> listaContadores;
-    int cont1,cont2,cont3;
 
 
 public slots:
@@ -62,6 +65,7 @@ public slots:
     void deselectWindow();
     void changeImage();
     void deleteImageInSet();
+    void Match_ORB();
 
 };
 
