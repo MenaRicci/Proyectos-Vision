@@ -34,6 +34,8 @@ private:
     int numFoto;
     QTimer timer;
 
+    ORB orb;
+
     VideoCapture *cap;
     RCDraw *visorS, *visorD;
     QImage *imgS, *imgD;
@@ -43,6 +45,10 @@ private:
     bool click, savebool, loadbool,resizebool,enlargebool;
     Rect imageWindow;
     std::vector<Mat> conjuntoImagen1 ;
+
+    std::vector<std::vector<Mat> > ListaObjetosImagenes;
+    std::vector<std::vector<std::vector<KeyPoint> > > ListaPuntosImagenes;
+    std::vector<int> listaContadores;
     int cont1,cont2,cont3;
 
 

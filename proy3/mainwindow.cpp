@@ -31,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
-
     conjuntoImagen1.insert(conjuntoImagen1.begin(),15,Black_Gray_Image);
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
@@ -44,8 +43,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(visorS,SIGNAL(windowSelected(QPointF, int, int)),this,SLOT(selectWindow(QPointF, int, int)));
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
+    ListaObjetosImagenes.resize(3);
+    //listaContadores.resize(3);
+    listaContadores.insert(listaContadores.begin(),3,0);
+    qDebug()<<listaContadores[2];
     timer.start(60);
 
+
+
+    orb=ORB();
 
 }
 
@@ -85,8 +91,6 @@ void MainWindow::compute()
         memcpy(imgD->bits(), destGray2ColorImage.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorD
 
     }
-
-
     if(winSelected)
     {
         visorS->drawSquare(QPointF(imageWindow.x+imageWindow.width/2, imageWindow.y+imageWindow.height/2), imageWindow.width,imageWindow.height, Qt::green );
@@ -94,9 +98,6 @@ void MainWindow::compute()
     }
     visorS->update();
     visorD->update();
-
-
-
 
 }
 void MainWindow::start_stop_capture(bool start)
@@ -199,84 +200,36 @@ else{
 void MainWindow::saveImageInSet(){
     Mat Imagen;
     Imagen=destGrayImage.clone();
-    switch (ui->SelectComboBox->currentIndex()) {
-    case 0 : //OBJETO 1
-        conjuntoImagen1.insert(conjuntoImagen1.begin()+0+cont1,Imagen);
-        cont1++;
-        qDebug()<<"Contador1: "<<cont1;
-        break;
-    case 1: //OBJETO 2
-        conjuntoImagen1.insert(conjuntoImagen1.begin()+5+cont2,Imagen);
-        cont2++;
-         qDebug()<<"Contador2: "<<cont2;
-        break;
-    case 2: //OBJETO 3
-        conjuntoImagen1.insert(conjuntoImagen1.begin()+10+cont3,Imagen);
-        cont3++;
-        qDebug()<<"Contador3: "<<cont3;
-
-        break;
-    default:
-
-        break;
+    int objeto=ui->SelectComboBox->currentIndex();
+    int cont=listaContadores[objeto];
+    if(cont<5 && winSelected){
+        ListaObjetosImagenes[objeto].push_back(Imagen);
+        listaContadores[objeto]++;
     }
-
 }
+
 void MainWindow::changeImage(){
      Mat Image;
      //qDebug()<<"Num"<<pos;
     int posicion= ui->horizontalSlider->value();
-    switch (ui->SelectComboBox->currentIndex()) {
-    case 0:
-            Image=*(conjuntoImagen1.begin()+ posicion -1);
-            destGrayImage=Image.clone();
-
-        break;
-    case 1:
-
-            Image=*(conjuntoImagen1.begin()+posicion+4);
-            destGrayImage=Image.clone();
-
-        break;
-    case 2:
-            Image=*(conjuntoImagen1.begin()+posicion+9);
-            destGrayImage=Image.clone();
-
-        break;
-    }
+    int objeto = ui->SelectComboBox->currentIndex();
+    int size_objeto=ListaObjetosImagenes[objeto].size();
+    if(!ListaObjetosImagenes[objeto].empty() && posicion<=size_objeto){
+        Image=ListaObjetosImagenes[objeto][posicion-1];
+        destGrayImage=Image.clone();
+    }else
+        destGrayImage=Black_Gray_Image.clone();
 
 }
-
 void MainWindow::deleteImageInSet(){
-   // Mat Imagen;
-   // Imagen=destGrayImage.clone();
-    switch (ui->SelectComboBox->currentIndex()) {
-    case 0 : //OBJETO 1
-        if(cont1>0 && (ui->horizontalSlider->value()<=cont1)){
-            conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()-1);
-            cont1--;
-            qDebug()<<"Contador1: "<<cont1;
-        }
-        break;
-    case 1: //OBJETO 2
-        if(cont2>0 && (ui->horizontalSlider->value()<=cont2)){
-            conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+4);
-            cont2--;
-            qDebug()<<"Contador2: "<<cont2;
-        }
-        break;
-    case 2: //OBJETO 3
-        if(cont3>0 && (ui->horizontalSlider->value()<=cont3)){
-        conjuntoImagen1.erase(conjuntoImagen1.begin()+ui->horizontalSlider->value()+9);
-        cont3--;
-        qDebug()<<"Contador3: "<<cont3;
-        }
 
-        break;
-    default:
+    int objeto=ui->SelectComboBox->currentIndex();
+    int posicion=ui->horizontalSlider->value();
+    int cont=listaContadores[objeto];
+    if(cont>0 && (posicion<=cont)){
+      ListaObjetosImagenes[objeto].erase(ListaObjetosImagenes[objeto].begin()+posicion-1);
+      listaContadores[objeto]--;
 
-        break;
     }
-
 }
 
