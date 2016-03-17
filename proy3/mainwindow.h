@@ -35,6 +35,7 @@ private:
     QTimer timer;
 
     ORB orb;
+    BFMatcher bfm;
 
     VideoCapture *cap;
     RCDraw *visorS, *visorD;
@@ -51,8 +52,11 @@ private:
     std::vector<KeyPoint> ListaPuntosOrigen;
     Mat descritorOrigen;
     std::vector<std::vector<Mat> > listaDescriptores;
+    std::vector<Mat> coleccion;
+    std::vector<std::vector<Point2f> > LpFinal;
     std::vector<DMatch> matches;
     std::vector<int> listaContadores;
+    double MaxDistance;
 
 
 public slots:
@@ -66,6 +70,8 @@ public slots:
     void changeImage();
     void deleteImageInSet();
     void Match_ORB();
+    void Match_BFM();
+    int IndiceObjeto(int id);
 
 };
 

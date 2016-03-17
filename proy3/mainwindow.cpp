@@ -31,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
-    conjuntoImagen1.insert(conjuntoImagen1.begin(),15,Black_Gray_Image);
+
+
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
@@ -43,12 +44,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(visorS,SIGNAL(windowSelected(QPointF, int, int)),this,SLOT(selectWindow(QPointF, int, int)));
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
+
     ListaObjetosImagenes.resize(3);
-    //listaContadores.resize(3);
+    listaDescriptores.resize(3);
+    ListaPuntosImagenes.resize(3);
+    LpFinal.resize(3);
+
     listaContadores.insert(listaContadores.begin(),3,0);
-    qDebug()<<listaContadores[2];
-    timer.start(60);
+
     orb=ORB();
+    bfm=BFMatcher();
+    MaxDistance=300.0;
+    timer.start(60);
 
 }
 
@@ -75,6 +82,9 @@ void MainWindow::compute()
 
     }
     changeImage();
+
+    Match_ORB();
+    Match_BFM();
     if(showColorImage)
     {
         memcpy(imgS->bits(), colorImage.data , 320*240*3*sizeof(uchar));
@@ -232,21 +242,55 @@ void MainWindow::deleteImageInSet(){
 }
 
 void MainWindow::Match_ORB(){
-
+    coleccion.clear();
     orb.detect(grayImage,ListaPuntosOrigen);
     orb.compute(grayImage,ListaPuntosOrigen,descritorOrigen);
     //Comprobar si se ha modificado la lista de imagenes de un objeto
     for (int i = 0; i < ui->SelectComboBox->count() ; ++i) {
         for (int j = 0; j < listaContadores[i] ; ++j) {
             std::vector<KeyPoint> puntos;
-            orb.detect(ListaObjetosImagenes[i][j],puntos);
-            ListaPuntosImagenes[i][j]=puntos;
             Mat descriptor;
+
+            orb.detect(ListaObjetosImagenes[i][j],puntos);
             orb.compute(ListaObjetosImagenes[i][j],puntos,descriptor);
-            listaDescriptores[i][j]=descriptor.clone();
+            listaDescriptores[i].push_back(descriptor);
+            coleccion.push_back(descriptor);
+            ListaPuntosImagenes[i].push_back(puntos);;
+        }
+    }
+}
+
+void MainWindow::Match_BFM(){
+    bfm.clear();
+    bfm.add(coleccion);
+    bfm.match(descritorOrigen,matches);
+    KeyPoint p;
+    int indice;
+    Rect rect;
+    QRect rect2;
+
+    for(uint i=0;i<matches.size();i++){
+        qDebug()<<matches[i].distance;
+        if(matches[i].distance<MaxDistance){
+            qDebug()<<"dentro del IF";
+            p=ListaPuntosOrigen[matches[i].queryIdx];
+            indice=IndiceObjeto(matches[i].imgIdx);
+            if(indice!=-1)  LpFinal[indice].push_back(p.pt);
         }
     }
 
+    if(!LpFinal[0].empty()){
+        rect=boundingRect(LpFinal[0]);
+
+        visorS->drawSquare(QPointF(rect.x,rect.y),rect.width,rect.height,Qt::blue);
+    }
 
 
+}
+
+int MainWindow::IndiceObjeto(int id){
+    if(id>=0 && id<listaContadores[0]) return 0;
+    if(id>=listaContadores[0] && id<(listaContadores[1]+listaContadores[0]))return 1;
+    if((id>=(listaContadores[1]+listaContadores[0])) && (id<(listaContadores[2]+listaContadores[1]+listaContadores[0])))return 2;
+    return -1;
 }
