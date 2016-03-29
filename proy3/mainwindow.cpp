@@ -321,5 +321,5 @@ void MainWindow::PintarRect(){
              visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
              //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
          }
-    }
+
 }
