@@ -56,6 +56,9 @@ private:
     std::vector<std::vector<Point2f> > LpFinal;
     std::vector<DMatch> matches;
     std::vector<int> listaContadores;
+
+    std::vector<QColor> Colores;
+
     double MaxDistance;
 
 
@@ -72,6 +75,8 @@ public slots:
     void Match_ORB();
     void Match_BFM();
     int IndiceObjeto(int id);
+    void BorrarLista();
+    void PintarRect();
 
 };
 

@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     numFoto=0;
-    cap = new VideoCapture(0);
+    cap = new VideoCapture(1);
     if(!cap->isOpened())
         cap = new VideoCapture(1);
     capture = true;
@@ -52,9 +52,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     listaContadores.insert(listaContadores.begin(),3,0);
 
+    Colores.resize(5);
+    Colores[0]=Qt::red;
+    Colores[1]=Qt::yellow;
+    Colores[2]=Qt::blue;
+    Colores[3]=Qt::green;
+    Colores[4]=Qt::red+Qt::yellow;
+
     orb=ORB();
-    bfm=BFMatcher();
-    MaxDistance=300.0;
+    bfm=BFMatcher(NORM_HAMMING,false);
+
+
+    MaxDistance=50.0;
     timer.start(60);
 
 }
@@ -101,7 +110,6 @@ void MainWindow::compute()
     if(winSelected)
     {
         visorS->drawSquare(QPointF(imageWindow.x+imageWindow.width/2, imageWindow.y+imageWindow.height/2), imageWindow.width,imageWindow.height, Qt::green );
-
     }
     visorS->update();
     visorD->update();
@@ -260,32 +268,41 @@ void MainWindow::Match_ORB(){
     }
 }
 
+
+void MainWindow::BorrarLista(){
+    for (int indice = 0; indice < 3 ; ++indice) {
+        LpFinal[indice].clear();
+    }
+}
+
 void MainWindow::Match_BFM(){
     bfm.clear();
+    matches.clear();
+    BorrarLista();
     bfm.add(coleccion);
     bfm.match(descritorOrigen,matches);
     KeyPoint p;
     int indice;
-    Rect rect;
-    QRect rect2;
 
     for(uint i=0;i<matches.size();i++){
         qDebug()<<matches[i].distance;
+
         if(matches[i].distance<MaxDistance){
+
             qDebug()<<"dentro del IF";
             p=ListaPuntosOrigen[matches[i].queryIdx];
+
+            visorS->drawText(QPoint(p.pt.x,p.pt.y)," x ",8,Qt::yellow);
+
             indice=IndiceObjeto(matches[i].imgIdx);
+
             if(indice!=-1)  LpFinal[indice].push_back(p.pt);
+                            //LpFinal[indice].size();
+
+            qDebug();
         }
     }
-
-    if(!LpFinal[0].empty()){
-        rect=boundingRect(LpFinal[0]);
-
-        visorS->drawSquare(QPointF(rect.x,rect.y),rect.width,rect.height,Qt::blue);
-    }
-
-
+        PintarRect();
 }
 
 int MainWindow::IndiceObjeto(int id){
@@ -293,4 +310,16 @@ int MainWindow::IndiceObjeto(int id){
     if(id>=listaContadores[0] && id<(listaContadores[1]+listaContadores[0]))return 1;
     if((id>=(listaContadores[1]+listaContadores[0])) && (id<(listaContadores[2]+listaContadores[1]+listaContadores[0])))return 2;
     return -1;
+}
+
+void MainWindow::PintarRect(){
+    Rect rect;
+    int size= LpFinal.size();
+    for (int i = 0; i <size; ++i) {
+         if(!LpFinal[i].empty() && LpFinal[i].size()>4){
+             rect=boundingRect(LpFinal[i]);
+             visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
+             //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
+         }
+    }
 }
