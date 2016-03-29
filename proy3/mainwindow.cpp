@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     numFoto=0;
-    cap = new VideoCapture(1);
+    cap = new VideoCapture(0);
     if(!cap->isOpened())
         cap = new VideoCapture(1);
     capture = true;
@@ -321,5 +321,5 @@ void MainWindow::PintarRect(){
              visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
              //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
          }
-
+    }
 }
