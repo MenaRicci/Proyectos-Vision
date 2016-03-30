@@ -212,6 +212,7 @@ else{
      destGrayImage=grayImage.clone();
  }
  saveImageInSet();
+ winSelected=false;
 }
 void MainWindow::saveImageInSet(){
     Mat Imagen;
@@ -273,6 +274,7 @@ void MainWindow::Match_ORB(){
 void MainWindow::BorrarLista(){
     for (int indice = 0; indice < 3 ; ++indice) {
         LpFinal[indice].clear();
+        LpFinalAmpliacion[indice].clear();
     }
 }
 
@@ -314,7 +316,6 @@ void MainWindow::DispersionPuntos(int i){
     float distancia;
     Rect rectOri,rectNew;
     Pcaracteristicos aux;
-    //simplificar quitando lo de los objetos
 
         int size=LpFinal[i].size();
         listaDistancias.resize(size);
@@ -324,11 +325,10 @@ void MainWindow::DispersionPuntos(int i){
                 aux.P=LpFinal[i][k];
                 listaDistancias[j].push_back(aux);
             }
-            //Ordenar las distancias de cada punto con el resto
             std::sort(listaDistancias[j].begin(),listaDistancias[j].end(),FuncionOrdenacion);
-            // obtener la distancia N/2 de cada punto
         }
-        distancia=listaDistancias[0][size/2].distancia;
+
+        if(size!=0)distancia=listaDistancias[i][size/2].distancia;
         int indice=0;
         for (int t = 1; t < size; ++t) {
             if(listaDistancias[t][size/2].distancia < distancia){
@@ -336,14 +336,14 @@ void MainWindow::DispersionPuntos(int i){
                 indice=t;
             }
         }
-        //ya tenemos el punto de referencia
+
         for (int j = 0; j < size; ++j) {
             if(j<=(size/2)) LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
             else{
                 rectOri=boundingRect(LpFinalAmpliacion[i]);
                 LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
                 rectNew=boundingRect(LpFinalAmpliacion[i]);
-                if(rectNew.area() >= (2*rectOri.area())) LpFinalAmpliacion[i].pop_back();
+                if(1.0*rectNew.area() >= (1.5*rectOri.area())) LpFinalAmpliacion[i].pop_back();
             }
         }
         listaDistancias.clear();
