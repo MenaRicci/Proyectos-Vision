@@ -17,6 +17,13 @@
 
 using namespace cv;
 
+typedef struct {
+    float distancia;
+    Point2f P;
+}Pcaracteristicos;
+
+bool FuncionOrdenacion(Pcaracteristicos i,Pcaracteristicos j);
+
 namespace Ui {
     class MainWindow;
 }
@@ -59,6 +66,10 @@ private:
 
     std::vector<QColor> Colores;
 
+    //---------------------AMPLIACIONES--------------------------
+    std::vector<std::vector<Pcaracteristicos> > listaDistancias;
+    std::vector<std::vector<Point2f> > LpFinalAmpliacion;
+
     double MaxDistance;
 
 
@@ -77,6 +88,8 @@ public slots:
     int IndiceObjeto(int id);
     void BorrarLista();
     void PintarRect();
+    void DispersionPuntos(int i);
+
 
 };
 

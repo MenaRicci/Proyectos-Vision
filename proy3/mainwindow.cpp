@@ -65,7 +65,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     MaxDistance=50.0;
     timer.start(60);
-
+    //------------------AMPLIACIONES-------------------
+    LpFinalAmpliacion.resize(3);
 }
 
 MainWindow::~MainWindow()
@@ -302,7 +303,54 @@ void MainWindow::Match_BFM(){
             qDebug();
         }
     }
+    for (int j = 0; j < 3; ++j) {
+        DispersionPuntos(j);
+    }
         PintarRect();
+}
+
+void MainWindow::DispersionPuntos(int i){
+
+    float distancia;
+    Rect rectOri,rectNew;
+    Pcaracteristicos aux;
+    //simplificar quitando lo de los objetos
+
+        int size=LpFinal[i].size();
+        listaDistancias.resize(size);
+        for (int j = 0; j < size; ++j) {
+            for (int k = 0; k < size; ++k) {
+                aux.distancia=sqrt(pow((LpFinal[i][k].x-LpFinal[i][j].x),2)-pow((LpFinal[i][k].y-LpFinal[i][j].y),2));
+                aux.P=LpFinal[i][k];
+                listaDistancias[j].push_back(aux);
+            }
+            //Ordenar las distancias de cada punto con el resto
+            std::sort(listaDistancias[j].begin(),listaDistancias[j].end(),FuncionOrdenacion);
+            // obtener la distancia N/2 de cada punto
+        }
+        distancia=listaDistancias[0][size/2].distancia;
+        int indice=0;
+        for (int t = 1; t < size; ++t) {
+            if(listaDistancias[t][size/2].distancia < distancia){
+                distancia=listaDistancias[t][size/2].distancia;
+                indice=t;
+            }
+        }
+        //ya tenemos el punto de referencia
+        for (int j = 0; j < size; ++j) {
+            if(j<=(size/2)) LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
+            else{
+                rectOri=boundingRect(LpFinalAmpliacion[i]);
+                LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
+                rectNew=boundingRect(LpFinalAmpliacion[i]);
+                if(rectNew.area() >= (2*rectOri.area())) LpFinalAmpliacion[i].pop_back();
+            }
+        }
+        listaDistancias.clear();
+}
+
+bool FuncionOrdenacion(Pcaracteristicos i, Pcaracteristicos j){
+    return (i.distancia<j.distancia);
 }
 
 int MainWindow::IndiceObjeto(int id){
@@ -314,10 +362,10 @@ int MainWindow::IndiceObjeto(int id){
 
 void MainWindow::PintarRect(){
     Rect rect;
-    int size= LpFinal.size();
+    int size= LpFinalAmpliacion.size();
     for (int i = 0; i <size; ++i) {
-         if(!LpFinal[i].empty() && LpFinal[i].size()>4){
-             rect=boundingRect(LpFinal[i]);
+         if(!LpFinalAmpliacion[i].empty() && LpFinalAmpliacion[i].size()>4){
+             rect=boundingRect(LpFinalAmpliacion[i]);
              visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
              //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
          }
