@@ -288,11 +288,11 @@ void MainWindow::Match_BFM(){
     int indice;
 
     for(uint i=0;i<matches.size();i++){
-        qDebug()<<matches[i].distance;
+        //qDebug()<<matches[i].distance;
 
         if(matches[i].distance<MaxDistance){
 
-            qDebug()<<"dentro del IF";
+            //qDebug()<<"dentro del IF";
             p=ListaPuntosOrigen[matches[i].queryIdx];
 
             visorS->drawText(QPoint(p.pt.x,p.pt.y)," x ",8,Qt::yellow);
@@ -302,7 +302,7 @@ void MainWindow::Match_BFM(){
             if(indice!=-1)  LpFinal[indice].push_back(p.pt);
                             //LpFinal[indice].size();
 
-            qDebug();
+            //qDebug();
         }
     }
     for (int j = 0; j < 3; ++j) {
@@ -364,10 +364,52 @@ void MainWindow::PintarRect(){
     Rect rect;
     int size= LpFinalAmpliacion.size();
     for (int i = 0; i <size; ++i) {
-         if(!LpFinalAmpliacion[i].empty() && LpFinalAmpliacion[i].size()>4){
+         if(!LpFinalAmpliacion[i].empty() && LpFinalAmpliacion[i].size()>4 && ComparacionAreas(i)){
              rect=boundingRect(LpFinalAmpliacion[i]);
              visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
              //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
          }
     }
 }
+
+
+bool MainWindow::ComparacionAreas(int i){
+
+    Rect rect=boundingRect(LpFinalAmpliacion[i]);
+    QRect qrect=QRect(rect.x,rect.y,rect.height,rect.width);
+    QRect qrect2,qrect3;
+    Rect rect2;
+    int cont=2;
+
+    for (int ind = 0; ind < 3; ++ind) {
+        if( i != ind){
+           if(!LpFinalAmpliacion[ind].empty() && LpFinalAmpliacion[ind].size()>4){
+               rect2=boundingRect(LpFinalAmpliacion[ind]);
+               qrect2=QRect(rect2.x,rect2.y,rect2.height,rect2.width);
+               qrect3=qrect.intersected(qrect2);
+
+               int area1,area2;
+               area1=qrect.height()*qrect.width();
+               area2=qrect3.height()*qrect3.width();
+
+               if(qrect.height()*qrect.width() < qrect2.height()*qrect2.width()){
+                   area1=qrect.height()*qrect.width();;
+               }else{
+                   area1=qrect2.height()*qrect2.width();;
+               }
+               if(area1* 0.1 < area2){
+                   if(LpFinalAmpliacion[i].size() < LpFinalAmpliacion[ind].size())
+                       cont--;
+               }
+           }
+        }
+    }
+
+    if(cont==2)
+        return true;
+    else{
+        return false;
+    }
+}
+
+

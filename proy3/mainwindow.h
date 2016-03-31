@@ -89,6 +89,7 @@ public slots:
     void BorrarLista();
     void PintarRect();
     void DispersionPuntos(int i);
+    bool ComparacionAreas(int i);
 
 
 };
