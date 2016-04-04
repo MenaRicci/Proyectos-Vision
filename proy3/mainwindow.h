@@ -63,6 +63,7 @@ private:
     std::vector<std::vector<Point2f> > LpFinal;
     std::vector<DMatch> matches;
     std::vector<int> listaContadores;
+    std::vector<QString> NombresObjetos;
 
     std::vector<QColor> Colores;
 

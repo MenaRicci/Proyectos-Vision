@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     numFoto=0;
-    cap = new VideoCapture(0);
+    cap = new VideoCapture(1);
     if(!cap->isOpened())
         cap = new VideoCapture(1);
     capture = true;
@@ -48,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ListaObjetosImagenes.resize(3);
     listaDescriptores.resize(3);
     ListaPuntosImagenes.resize(3);
+    NombresObjetos.resize(3);
+    NombresObjetos[0]="Objeto 1";
+    NombresObjetos[1]="Objeto 2";
+    NombresObjetos[2]="Objeto 3";
     LpFinal.resize(3);
 
     listaContadores.insert(listaContadores.begin(),3,0);
@@ -295,7 +299,7 @@ void MainWindow::Match_BFM(){
             //qDebug()<<"dentro del IF";
             p=ListaPuntosOrigen[matches[i].queryIdx];
 
-            visorS->drawText(QPoint(p.pt.x,p.pt.y)," x ",8,Qt::yellow);
+           // visorS->drawText(QPoint(p.pt.x,p.pt.y)," x ",8,Qt::red);
 
             indice=IndiceObjeto(matches[i].imgIdx);
 
@@ -317,18 +321,20 @@ void MainWindow::DispersionPuntos(int i){
     Rect rectOri,rectNew;
     Pcaracteristicos aux;
 
+    listaDistancias.clear();
+
         int size=LpFinal[i].size();
         listaDistancias.resize(size);
         for (int j = 0; j < size; ++j) {
             for (int k = 0; k < size; ++k) {
-                aux.distancia=sqrt(pow((LpFinal[i][k].x-LpFinal[i][j].x),2)-pow((LpFinal[i][k].y-LpFinal[i][j].y),2));
+                aux.distancia=sqrt(pow((LpFinal[i][k].x-LpFinal[i][j].x),2) + pow((LpFinal[i][k].y-LpFinal[i][j].y),2));
                 aux.P=LpFinal[i][k];
                 listaDistancias[j].push_back(aux);
             }
             std::sort(listaDistancias[j].begin(),listaDistancias[j].end(),FuncionOrdenacion);
         }
 
-        if(size!=0)distancia=listaDistancias[i][size/2].distancia;
+        if(size!=0)distancia=listaDistancias[0][size/2].distancia;
         int indice=0;
         for (int t = 1; t < size; ++t) {
             if(listaDistancias[t][size/2].distancia < distancia){
@@ -337,16 +343,24 @@ void MainWindow::DispersionPuntos(int i){
             }
         }
 
+        if(size != 0)visorS->drawText(QPoint(LpFinal[i][indice].x,LpFinal[i][indice].y)," X ",10,Qt::blue);
+
         for (int j = 0; j < size; ++j) {
-            if(j<=(size/2)) LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
+            if(j<=(size/2)){ LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
+            visorS->drawText(QPoint(LpFinalAmpliacion[i][j].x,LpFinalAmpliacion[i][j].y)," x ",10,Qt::green);
+            }
             else{
                 rectOri=boundingRect(LpFinalAmpliacion[i]);
                 LpFinalAmpliacion[i].push_back(listaDistancias[indice][j].P);
                 rectNew=boundingRect(LpFinalAmpliacion[i]);
-                if(1.0*rectNew.area() >= (1.5*rectOri.area())) LpFinalAmpliacion[i].pop_back();
+                if(1.0*rectNew.area() >= (2.0*rectOri.area())){
+                    LpFinalAmpliacion[i].pop_back();
+                  //  visorS->drawText(QPoint(LpFinalAmpliacion[i][j].x,Lp[i][j].y)," x ",10,Qt::green);
+
+                    break;
+                }
             }
         }
-        listaDistancias.clear();
 }
 
 bool FuncionOrdenacion(Pcaracteristicos i, Pcaracteristicos j){
@@ -367,7 +381,7 @@ void MainWindow::PintarRect(){
          if(!LpFinalAmpliacion[i].empty() && LpFinalAmpliacion[i].size()>4 && ComparacionAreas(i)){
              rect=boundingRect(LpFinalAmpliacion[i]);
              visorS->drawSquare(QPointF(rect.x+rect.width/2,rect.y+rect.height/2),rect.width,rect.height,Colores[i]);
-             //visorS->drawText(QPoint(rect.x ,rect.y),"HOLA",16,Qt::red);
+            visorS->drawText(QPoint(rect.x ,rect.y),NombresObjetos[i],12,Colores[i]);
          }
     }
 }
