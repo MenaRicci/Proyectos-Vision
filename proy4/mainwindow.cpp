@@ -27,6 +27,12 @@ MainWindow::MainWindow(QWidget *parent) :
     destColorImage.create(240,320,CV_8UC3);
     Black_Color_Image.create(240,320,CV_8UC3);
     Black_Gray_Image.create(240,320,CV_8UC1);
+    ImagenRegiones.create(240,320,CV_32SC1);
+    ImagenBordes.create(240,320,CV_8UC1);
+
+
+    ImagenBordes.setTo(-1);
+
 
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
@@ -66,6 +72,13 @@ void MainWindow::compute()
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
 
     }
+
+
+
+
+    Canny(grayImage,ImagenBordes);
+
+
 
 
     if(showColorImage)
@@ -175,6 +188,60 @@ void MainWindow::selectWindow(QPointF p, int w, int h)
 void MainWindow::deselectWindow()
 {
     winSelected = false;
+}
+
+void MainWindow::Canny(Mat Img_Source, Mat Img_Dest){
+
+    cv::Canny(Img_Source,Img_Dest,30.0, 120.0);
+
+
+}
+
+
+/**
+ * En la ImagenRegiones si el punto no ha visitado tendra el valor -1
+ * Si ha sido visitado y no pertence a region, tendra el valor -2
+ * Si ha sido visitado y pertenece a la region del punto inicial, obtendra el valor pasado como parametro (region)
+ *
+ *
+ * @brief MainWindow::AnalisisRegion
+ * @param pInicial
+ * @param region
+ */
+void MainWindow::AnalisisRegion(Point pInicial,int region){
+
+    std::vector<Point> Lista;
+    Point Act, Nuevo;
+    int i=0;
+
+    int value_grey=grayImage.at<uchar>(pInicial.y,pInicial.x);
+
+    Lista.push_back(pInicial);
+    int size=Lista.size();
+    while(i<size){
+        Act=Lista[i];
+        i++;
+        if(Act.x>=0 && Act.x<320 && Act.y>=0 && Act.y < 240 && ImagenRegiones.at<int>(Act.y,Act.x)==-1){
+            ImagenRegiones.at<int>(Act.y,Act.x)=-2;
+            if(ImagenBordes.at<uchar>(Act.y,Act.y)!=255){
+                /*
+                 *Coger en el nivel de gris, del punto inicial
+                 * Comparar con Act si es "igual"(Diferencia en valor Absoluto < 20)
+                 * True --> Añadir a Region
+                 *      Añadir Vecinos
+                 * False -->  Quitamos Actual
+                 *
+                */
+
+            }
+
+        }
+        size=Lista.size();
+    }
+
+
+    Lista.clear();
+
 }
 
 

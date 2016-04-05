@@ -8,7 +8,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/video/video.hpp>
 #include <opencv2/features2d/features2d.hpp>
-//#include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
 #include <rcdraw.h>
@@ -20,6 +19,9 @@ using namespace cv;
 namespace Ui {
     class MainWindow;
 }
+
+
+
 
 class MainWindow : public QMainWindow
 {
@@ -39,9 +41,14 @@ private:
     QImage *imgS, *imgD;
     Mat colorImage, grayImage, destColorImage, destGrayImage, Black_Color_Image, Black_Gray_Image;
     Mat gray2ColorImage, destGray2ColorImage;
-    bool capture, showColorImage, winSelected,warpeded, clicked;
-    bool click, savebool, loadbool,resizebool,enlargebool;
+    bool capture, showColorImage, winSelected,clicked;
+    bool loadbool;
     Rect imageWindow;
+
+    std::vector<int> ListaRegiones;
+    Mat ImagenRegiones;
+    Mat ImagenBordes;
+
 
 
 public slots:
@@ -53,6 +60,8 @@ public slots:
     void selectWindow(QPointF p, int w, int h);
     void deselectWindow();
 
+    void Canny(Mat Img_Source, Mat Img_Dest);
+    void AnalisisRegion(Point pInicial,int region);
 };
 
 
