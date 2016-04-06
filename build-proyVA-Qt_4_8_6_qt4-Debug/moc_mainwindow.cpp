@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../proy3/mainwindow.h"
+#include "../proy4/mainwindow.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'mainwindow.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      16,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -34,18 +34,10 @@ static const uint qt_meta_data_MainWindow[] = {
       28,   22,   11,   11, 0x0a,
       59,   53,   11,   11, 0x0a,
       83,   11,   11,   11, 0x0a,
-      95,   11,   11,   11, 0x0a,
-     118,  112,   11,   11, 0x0a,
-     148,   11,   11,   11, 0x0a,
-     165,   11,   11,   11, 0x0a,
-     179,   11,   11,   11, 0x0a,
-     198,   11,   11,   11, 0x0a,
-     210,   11,   11,   11, 0x0a,
-     229,  226,  222,   11, 0x0a,
-     247,   11,   11,   11, 0x0a,
-     261,   11,   11,   11, 0x0a,
-     276,  274,   11,   11, 0x0a,
-     303,  274,  298,   11, 0x0a,
+     102,   96,   11,   11, 0x0a,
+     132,   11,   11,   11, 0x0a,
+     169,  149,   11,   11, 0x0a,
+     200,  184,   11,   11, 0x0a,
 
        0        // eod
 };
@@ -53,15 +45,11 @@ static const uint qt_meta_data_MainWindow[] = {
 static const char qt_meta_stringdata_MainWindow[] = {
     "MainWindow\0\0compute()\0start\0"
     "start_stop_capture(bool)\0color\0"
-    "change_color_gray(bool)\0set_Image()\0"
-    "saveImageInSet()\0p,w,h\0"
-    "selectWindow(QPointF,int,int)\0"
-    "deselectWindow()\0changeImage()\0"
-    "deleteImageInSet()\0Match_ORB()\0"
-    "Match_BFM()\0int\0id\0IndiceObjeto(int)\0"
-    "BorrarLista()\0PintarRect()\0i\0"
-    "DispersionPuntos(int)\0bool\0"
-    "ComparacionAreas(int)\0"
+    "change_color_gray(bool)\0load_Image()\0"
+    "p,w,h\0selectWindow(QPointF,int,int)\0"
+    "deselectWindow()\0Img_Source,Img_Dest\0"
+    "Canny(Mat,Mat)\0pInicial,region\0"
+    "AnalisisRegion(Point,int)\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -73,21 +61,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 0: _t->compute(); break;
         case 1: _t->start_stop_capture((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 2: _t->change_color_gray((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 3: _t->set_Image(); break;
-        case 4: _t->saveImageInSet(); break;
-        case 5: _t->selectWindow((*reinterpret_cast< QPointF(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
-        case 6: _t->deselectWindow(); break;
-        case 7: _t->changeImage(); break;
-        case 8: _t->deleteImageInSet(); break;
-        case 9: _t->Match_ORB(); break;
-        case 10: _t->Match_BFM(); break;
-        case 11: { int _r = _t->IndiceObjeto((*reinterpret_cast< int(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
-        case 12: _t->BorrarLista(); break;
-        case 13: _t->PintarRect(); break;
-        case 14: _t->DispersionPuntos((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 15: { bool _r = _t->ComparacionAreas((*reinterpret_cast< int(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 3: _t->load_Image(); break;
+        case 4: _t->selectWindow((*reinterpret_cast< QPointF(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
+        case 5: _t->deselectWindow(); break;
+        case 6: _t->Canny((*reinterpret_cast< Mat(*)>(_a[1])),(*reinterpret_cast< Mat(*)>(_a[2]))); break;
+        case 7: _t->AnalisisRegion((*reinterpret_cast< Point(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
     }
@@ -125,9 +103,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 8;
     }
     return _id;
 }
