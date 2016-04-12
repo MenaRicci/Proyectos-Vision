@@ -54,6 +54,7 @@ private:
     std::vector<STRegion> ListaRegiones;
     Mat ImagenRegiones;
     Mat ImagenBordes;
+    Mat ImagenVisitados;
 
 
 
@@ -71,8 +72,11 @@ public slots:
     void AnalisisRegionEstadistico(Point pInicial,int region, STRegion &aux);
     void Segmentacion();
     void PuntosNegros();
+    void PuntosFronteras();
+    void AnalisisFrontera(Point p, int region, int ind);
     int RegionAfin(Point p);
     void PintarSegmentado(Mat Img_Dest);
+    void PintarFrontera();
     int IdRegiones(int id, Point ori);
 };
 

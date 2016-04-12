@@ -29,14 +29,15 @@ MainWindow::MainWindow(QWidget *parent) :
     Black_Gray_Image.create(240,320,CV_8UC1);
     ImagenRegiones.create(240,320,CV_32SC1);
     ImagenBordes.create(240,320,CV_8UC1);
-
+    ImagenVisitados.create(240,320,CV_8UC1);
 
     ImagenRegiones.setTo(-1);
-
+    ImagenVisitados.setTo(0);
 
     destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
+
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
@@ -80,8 +81,14 @@ void MainWindow::compute()
 if(clicked){
     Canny(grayImage,ImagenBordes);
     Segmentacion();
-    PuntosNegros();
+    PuntosFronteras();
     PintarSegmentado(destGrayImage);
+    if(ui->Check_Border->isChecked()==true)
+        PintarFrontera();
+
+    ListaRegiones.clear();
+    ImagenRegiones.setTo(-1);
+    ImagenVisitados.setTo(0);
 }
 
 
@@ -204,7 +211,6 @@ void MainWindow::Canny(Mat Img_Source, Mat Img_Dest){
 
     cv::Canny(Img_Source,Img_Dest,30.0, 120.0);
 
-
 }
 
 
@@ -218,14 +224,15 @@ void MainWindow::Canny(Mat Img_Source, Mat Img_Dest){
  * @param pInicial
  * @param region
  */
+
 void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
 
     std::vector<Point> Lista;
     Point Act, Nuevo;
     int i=0;
 
-    int value_grey=grayImage.at<uchar>(pInicial.y,pInicial.x);
-    int grey_act;
+    uchar value_grey=grayImage.at<uchar>(pInicial.y,pInicial.x);
+    uchar grey_act;
 
     Lista.push_back(pInicial);
     int size=Lista.size();
@@ -233,11 +240,12 @@ void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
         Act=Lista[i];
         i++;
         if(Act.x>=0 && Act.x<320 && Act.y>=0 && Act.y < 240 && ImagenRegiones.at<int>(Act.y,Act.x)==-1){
+            //    ImagenRegiones.at<int>(Act.y,Act.x)=-2;
                 grey_act=grayImage.at<uchar>(Act.y,Act.x);
-                if(abs(grey_act-value_grey)<20){
+                if(abs(grey_act-value_grey)<100){
                     ImagenRegiones.at<int>(Act.y,Act.x)=region;
                     aux.numP++;
-                    if(ImagenBordes.at<uchar>(Act.y,Act.y)==0){
+                    //if(ImagenBordes.at<uchar>(Act.y,Act.x)==0){
                         Nuevo.x=Act.x;
                         Nuevo.y=Act.y-1;
                         Lista.push_back(Nuevo);
@@ -245,6 +253,7 @@ void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
                         Nuevo.x=Act.x+1;
                         Nuevo.y=Act.y;
                         Lista.push_back(Nuevo);
+
 
                         Nuevo.x=Act.x;
                         Nuevo.y=Act.y+1;
@@ -254,10 +263,8 @@ void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
                         Nuevo.y=Act.y;
                         Lista.push_back(Nuevo);
 
-                    }else{
-                        aux.ListaFrontera.push_back(Act);
                     }
-                }
+                //}
 
         }
         size=Lista.size();
@@ -288,12 +295,12 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
             grey_act=grayImage.at<uchar>(Act.y,Act.x);
             mediaN=(aux.numP*media+grey_act)/(aux.numP+1);
             varianzaN=(aux.numP*varianza + (grey_act-media)*(grey_act-mediaN))/(aux.numP+1);
-                if(varianzaN<1){//------------FIJAR UMBRAL-------------------------
+                if(varianzaN<15){//------------FIJAR UMBRAL-------------------------
                     media=mediaN;
                     varianza=varianzaN;
                     ImagenRegiones.at<int>(Act.y,Act.x)=region;
                     aux.numP++;
-                    if(ImagenBordes.at<uchar>(Act.y,Act.y)==0){
+                    if(ImagenBordes.at<uchar>(Act.y,Act.x)==0){
                         Nuevo.x=Act.x;
                         Nuevo.y=Act.y-1;
                         Lista.push_back(Nuevo);
@@ -311,7 +318,7 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
                         Lista.push_back(Nuevo);
 
                     }else{
-                        aux.ListaFrontera.push_back(Act);
+                        //aux.ListaFrontera.push_back(Act);
                     }
                 }
 
@@ -336,6 +343,7 @@ void MainWindow::Segmentacion(){
                 p.y=i;
                 aux.pOri=p;
                 aux.numP=1;
+
                 if(!ui->Check_Statistics->isChecked())
                     AnalisisRegion(p,contRegion,aux);
                 else
@@ -345,11 +353,86 @@ void MainWindow::Segmentacion(){
                 contRegion++;
             }
         }
+    } PuntosNegros();
+
+}
+
+void MainWindow::PuntosFronteras(){
+    Point p;
+    int region;
+    //STRegion aux2;
+    int size=ListaRegiones.size();
+    for (int i = 0; i < size; ++i) {
+        p=ListaRegiones[i].pOri;
+        region=ListaRegiones[i].id;
+        AnalisisFrontera(p, region, i);
     }
 }
 
+void MainWindow::AnalisisFrontera(Point p, int region, int ind){
+
+    std::vector<Point> Lista;
+    Point Act, Nuevo;
+    int i=0;
+    int boolean=0;
+
+    Lista.push_back(p);
+
+    int size=Lista.size();
+    while(i<size){
+
+        Act=Lista[i];
+        i++;
+    if(Act.x>=0 && Act.x<320 && Act.y>=0 && Act.y < 240 && ImagenRegiones.at<int>(Act.y,Act.x)==region && ImagenVisitados.at<int>(Act.y,Act.x)==0 ){
+
+        ImagenVisitados.at<int>(Act.y,Act.x)=1;
+
+        Nuevo.x=Act.x;
+        Nuevo.y=Act.y-1;
+        Lista.push_back(Nuevo);
+        if(Nuevo.x>=0 && Nuevo.x<320 && Nuevo.y>=0 && Nuevo.y < 240 && ImagenRegiones.at<int>(Nuevo.y,Nuevo.x)!=region )
+            boolean=1;
+
+        Nuevo.x=Act.x+1;
+        Nuevo.y=Act.y;
+        Lista.push_back(Nuevo);
+
+        if(Nuevo.x>=0 && Nuevo.x<320 && Nuevo.y>=0 && Nuevo.y < 240 && ImagenRegiones.at<int>(Nuevo.y,Nuevo.x)!=region )
+            boolean=1;
+
+
+        Nuevo.x=Act.x;
+        Nuevo.y=Act.y+1;
+        Lista.push_back(Nuevo);
+        if(Nuevo.x>=0 && Nuevo.x<320 && Nuevo.y>=0 && Nuevo.y < 240 && ImagenRegiones.at<int>(Nuevo.y,Nuevo.x)!=region )
+            boolean=1;
+
+
+        Nuevo.x=Act.x-1;
+        Nuevo.y=Act.y;
+        Lista.push_back(Nuevo);
+        if(Nuevo.x>=0 && Nuevo.x<320 && Nuevo.y>=0 && Nuevo.y < 240 && ImagenRegiones.at<int>(Nuevo.y,Nuevo.x)!=region )
+            boolean=1;
+
+        if(boolean==1)
+              ListaRegiones[ind].ListaFrontera.push_back(Act);
+        boolean=0;
+        }
+
+    size=Lista.size();
+
+    }
+
+    Lista.clear();
+
+}
+
+
+
 int MainWindow::RegionAfin(Point p){
-    int grey_act,greyN,greyNE,greyE,greySE,greyS,greySO,greyO,greyNO;
+    int grey_act,greyN,greyE,greyS,greyO;
+   //int greyNE,greySE,greySO,greyNO;
+
     grey_act=grayImage.at<uchar>(p.y,p.x);
     int id=0,aux,menor=grey_act;
     if(p.y-1>=0){
@@ -360,7 +443,7 @@ int MainWindow::RegionAfin(Point p){
             id=8;
         }
     }
-
+/*
     if(p.y-1>=0 && p.x+1<320){
         greyNE=grayImage.at<uchar>(p.y-1,p.x+1);
         aux=abs(greyNE-grey_act);
@@ -369,7 +452,8 @@ int MainWindow::RegionAfin(Point p){
             id=9;
         }
     }
-
+*/
+    /*
     if(p.y-1>=0 && p.x-1>=0){
         greyNO=grayImage.at<uchar>(p.y-1,p.x-1);
         aux=abs(greyNO-grey_act);
@@ -378,7 +462,7 @@ int MainWindow::RegionAfin(Point p){
             id=7;
         }
     }
-
+*/
     if( p.x+1<320){
         greyE=grayImage.at<uchar>(p.y,p.x+1);
         aux=abs(greyE-grey_act);
@@ -387,7 +471,7 @@ int MainWindow::RegionAfin(Point p){
             id=6;
         }
     }
-
+/*
     if(p.y+1<240 && p.x+1<320){
         greySE=grayImage.at<uchar>(p.y+1,p.x+1);
         aux=abs(greySE-grey_act);
@@ -396,7 +480,7 @@ int MainWindow::RegionAfin(Point p){
             id=3;
         }
     }
-
+*/
     if(p.y+1<240){
         greyS=grayImage.at<uchar>(p.y+1,p.x);
         aux=abs(greyS-grey_act);
@@ -405,7 +489,7 @@ int MainWindow::RegionAfin(Point p){
             id=2;
         }
     }
-
+/*
     if(p.y+1<240 && p.x-1>=0){
         greySO=grayImage.at<uchar>(p.y+1,p.x-1);
         aux=abs(greySO-grey_act);
@@ -414,7 +498,7 @@ int MainWindow::RegionAfin(Point p){
             id=1;
         }
     }
-
+*/
     if(p.x-1>=0){
         greyO=grayImage.at<uchar>(p.y,p.x-1);
         aux=abs(greyO-grey_act);
@@ -425,6 +509,7 @@ int MainWindow::RegionAfin(Point p){
     }
     return IdRegiones(id,p);
 }
+
 
 int MainWindow::IdRegiones(int id, Point ori){
 
@@ -459,6 +544,8 @@ int MainWindow::IdRegiones(int id, Point ori){
     return -1;
 }
 
+
+
 void MainWindow::PuntosNegros(){
     Point p;
 
@@ -473,6 +560,7 @@ void MainWindow::PuntosNegros(){
     }
 }
 
+
 void MainWindow::PintarSegmentado(Mat Img_Dest){
     int region;
     uchar grey;
@@ -482,21 +570,25 @@ void MainWindow::PintarSegmentado(Mat Img_Dest){
             region=ImagenRegiones.at<int>(i,j);
             grey=ListaRegiones[region].grey;
             Img_Dest.at<uchar>(i,j)=grey;
-            ListaRegiones[region].ListaFrontera.clear();
-             if(ImagenBordes.at<uchar>(i,j)!=0 && ui->Check_Border->isChecked()){
-                Img_Dest.at<uchar>(i,j)=Qt::green;
-            }
+
         }
     }
-
-    ListaRegiones.clear();
-    ImagenRegiones.setTo(-1);
 }
 
 
+void MainWindow::PintarFrontera(){
 
-
-
-
-
-
+    Point aux;
+    int size=ListaRegiones.size();
+    int sizeFr;
+    qDebug()<<"Numero de Regiones:" <<size;
+    for (int i = 0; i < size ; ++i) {
+        sizeFr=ListaRegiones[i].ListaFrontera.size();
+        //printf("Numero de Fronteras: %i\n",sizeFr);
+        for (int j = 0; j < sizeFr; ++j) {
+            aux=ListaRegiones[i].ListaFrontera[j];
+            visorD->drawEllipse(QPoint(aux.x,aux.y),1,1,Qt::green);
+            //visorD->drawText(QPoint(aux.x,aux.y),"o",3,Qt::green);
+        }
+    }
+}
