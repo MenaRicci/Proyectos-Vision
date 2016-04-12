@@ -13,12 +13,10 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
-#include <QtGui/QComboBox>
+#include <QtGui/QCheckBox>
 #include <QtGui/QFrame>
 #include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
 #include <QtGui/QPushButton>
-#include <QtGui/QSlider>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -30,17 +28,16 @@ public:
     QFrame *imageFrameD;
     QPushButton *captureButton;
     QPushButton *colorButton;
-    QPushButton *AddObjIma;
-    QLabel *label;
-    QComboBox *SelectComboBox;
-    QPushButton *DelObjIma;
-    QSlider *horizontalSlider;
+    QPushButton *LoadButton;
+    QCheckBox *Check_Border;
+    QCheckBox *Check_Statistics;
+    QCheckBox *Check_Merge;
 
     void setupUi(QWidget *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(860, 373);
+        MainWindow->resize(860, 285);
         imageFrameS = new QFrame(MainWindow);
         imageFrameS->setObjectName(QString::fromUtf8("imageFrameS"));
         imageFrameS->setGeometry(QRect(20, 20, 320, 240));
@@ -58,31 +55,21 @@ public:
         captureButton->setChecked(true);
         colorButton = new QPushButton(MainWindow);
         colorButton->setObjectName(QString::fromUtf8("colorButton"));
-        colorButton->setGeometry(QRect(710, 50, 151, 31));
+        colorButton->setGeometry(QRect(710, 70, 151, 31));
         colorButton->setCheckable(true);
         colorButton->setChecked(false);
-        AddObjIma = new QPushButton(MainWindow);
-        AddObjIma->setObjectName(QString::fromUtf8("AddObjIma"));
-        AddObjIma->setGeometry(QRect(710, 200, 151, 31));
-        AddObjIma->setCheckable(false);
-        AddObjIma->setChecked(false);
-        AddObjIma->setAutoRepeat(false);
-        label = new QLabel(MainWindow);
-        label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(750, 120, 91, 21));
-        SelectComboBox = new QComboBox(MainWindow);
-        SelectComboBox->setObjectName(QString::fromUtf8("SelectComboBox"));
-        SelectComboBox->setGeometry(QRect(740, 140, 101, 31));
-        DelObjIma = new QPushButton(MainWindow);
-        DelObjIma->setObjectName(QString::fromUtf8("DelObjIma"));
-        DelObjIma->setGeometry(QRect(710, 240, 151, 29));
-        horizontalSlider = new QSlider(MainWindow);
-        horizontalSlider->setObjectName(QString::fromUtf8("horizontalSlider"));
-        horizontalSlider->setGeometry(QRect(470, 310, 160, 29));
-        horizontalSlider->setMinimum(1);
-        horizontalSlider->setMaximum(5);
-        horizontalSlider->setPageStep(1);
-        horizontalSlider->setOrientation(Qt::Horizontal);
+        LoadButton = new QPushButton(MainWindow);
+        LoadButton->setObjectName(QString::fromUtf8("LoadButton"));
+        LoadButton->setGeometry(QRect(710, 120, 151, 27));
+        Check_Border = new QCheckBox(MainWindow);
+        Check_Border->setObjectName(QString::fromUtf8("Check_Border"));
+        Check_Border->setGeometry(QRect(720, 160, 97, 22));
+        Check_Statistics = new QCheckBox(MainWindow);
+        Check_Statistics->setObjectName(QString::fromUtf8("Check_Statistics"));
+        Check_Statistics->setGeometry(QRect(720, 200, 97, 22));
+        Check_Merge = new QCheckBox(MainWindow);
+        Check_Merge->setObjectName(QString::fromUtf8("Check_Merge"));
+        Check_Merge->setGeometry(QRect(720, 240, 97, 22));
 
         retranslateUi(MainWindow);
 
@@ -94,15 +81,10 @@ public:
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Proyecto de Visi\303\263n Artificial", 0, QApplication::UnicodeUTF8));
         captureButton->setText(QApplication::translate("MainWindow", "Stop Capture", 0, QApplication::UnicodeUTF8));
         colorButton->setText(QApplication::translate("MainWindow", "Color Image", 0, QApplication::UnicodeUTF8));
-        AddObjIma->setText(QApplication::translate("MainWindow", "Add Object Image", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("MainWindow", "Select Object", 0, QApplication::UnicodeUTF8));
-        SelectComboBox->clear();
-        SelectComboBox->insertItems(0, QStringList()
-         << QApplication::translate("MainWindow", "Obj1", 0, QApplication::UnicodeUTF8)
-         << QApplication::translate("MainWindow", "Obj2", 0, QApplication::UnicodeUTF8)
-         << QApplication::translate("MainWindow", "Obj3", 0, QApplication::UnicodeUTF8)
-        );
-        DelObjIma->setText(QApplication::translate("MainWindow", "Del Object Image", 0, QApplication::UnicodeUTF8));
+        LoadButton->setText(QApplication::translate("MainWindow", "Load File", 0, QApplication::UnicodeUTF8));
+        Check_Border->setText(QApplication::translate("MainWindow", "Draw Borders", 0, QApplication::UnicodeUTF8));
+        Check_Statistics->setText(QApplication::translate("MainWindow", "Use statistics", 0, QApplication::UnicodeUTF8));
+        Check_Merge->setText(QApplication::translate("MainWindow", "Merge", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

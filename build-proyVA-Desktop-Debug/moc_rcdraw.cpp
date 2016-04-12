@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../proy3/rcdraw.h"
+#include "../proy4/rcdraw.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'rcdraw.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63

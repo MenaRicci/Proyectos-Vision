@@ -20,7 +20,13 @@ namespace Ui {
     class MainWindow;
 }
 
-
+typedef struct{
+    int id;
+    Point pOri;
+    int numP;
+    uchar grey;
+    std::vector<Point> ListaFrontera;
+}STRegion;
 
 
 class MainWindow : public QMainWindow
@@ -45,7 +51,7 @@ private:
     bool loadbool;
     Rect imageWindow;
 
-    std::vector<int> ListaRegiones;
+    std::vector<STRegion> ListaRegiones;
     Mat ImagenRegiones;
     Mat ImagenBordes;
 
@@ -61,7 +67,13 @@ public slots:
     void deselectWindow();
 
     void Canny(Mat Img_Source, Mat Img_Dest);
-    void AnalisisRegion(Point pInicial,int region);
+    void AnalisisRegion(Point pInicial,int region, STRegion &aux);
+    void AnalisisRegionEstadistico(Point pInicial,int region, STRegion &aux);
+    void Segmentacion();
+    void PuntosNegros();
+    int RegionAfin(Point p);
+    void PintarSegmentado(Mat Img_Dest);
+    int IdRegiones(int id, Point ori);
 };
 
 
