@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      14,   14, // methods
+      17,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -41,9 +41,12 @@ static const uint qt_meta_data_MainWindow[] = {
      240,  184,   11,   11, 0x0a,
      287,   11,   11,   11, 0x0a,
      302,   11,   11,   11, 0x0a,
-     323,  321,  317,   11, 0x0a,
-     350,  341,   11,   11, 0x0a,
-     379,  372,  317,   11, 0x0a,
+     317,   11,   11,   11, 0x0a,
+     348,  335,   11,   11, 0x0a,
+     386,  384,  380,   11, 0x0a,
+     413,  404,   11,   11, 0x0a,
+     435,   11,   11,   11, 0x0a,
+     459,  452,  380,   11, 0x0a,
 
        0        // eod
 };
@@ -57,10 +60,12 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "Canny(Mat,Mat)\0pInicial,region,aux\0"
     "AnalisisRegion(Point,int,STRegion&)\0"
     "AnalisisRegionEstadistico(Point,int,STRegion&)\0"
-    "Segmentacion()\0PuntosNegros()\0int\0p\0"
-    "RegionAfin(Point)\0Img_Dest\0"
-    "PintarSegmentado(Mat)\0id,ori\0"
-    "IdRegiones(int,Point)\0"
+    "Segmentacion()\0PuntosNegros()\0"
+    "PuntosFronteras()\0p,region,ind\0"
+    "AnalisisFrontera(Point,int,int)\0int\0"
+    "p\0RegionAfin(Point)\0Img_Dest\0"
+    "PintarSegmentado(Mat)\0PintarFrontera()\0"
+    "id,ori\0IdRegiones(int,Point)\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -80,10 +85,13 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 8: _t->AnalisisRegionEstadistico((*reinterpret_cast< Point(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< STRegion(*)>(_a[3]))); break;
         case 9: _t->Segmentacion(); break;
         case 10: _t->PuntosNegros(); break;
-        case 11: { int _r = _t->RegionAfin((*reinterpret_cast< Point(*)>(_a[1])));
+        case 11: _t->PuntosFronteras(); break;
+        case 12: _t->AnalisisFrontera((*reinterpret_cast< Point(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
+        case 13: { int _r = _t->RegionAfin((*reinterpret_cast< Point(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
-        case 12: _t->PintarSegmentado((*reinterpret_cast< Mat(*)>(_a[1]))); break;
-        case 13: { int _r = _t->IdRegiones((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< Point(*)>(_a[2])));
+        case 14: _t->PintarSegmentado((*reinterpret_cast< Mat(*)>(_a[1]))); break;
+        case 15: _t->PintarFrontera(); break;
+        case 16: { int _r = _t->IdRegiones((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< Point(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
         default: ;
         }
@@ -122,9 +130,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 14)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 14;
+        _id -= 17;
     }
     return _id;
 }
