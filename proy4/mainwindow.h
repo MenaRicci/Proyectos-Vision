@@ -26,8 +26,14 @@ typedef struct{
     int numP;
     uchar grey;
     std::vector<Point> ListaFrontera;
+
 }STRegion;
 
+typedef struct{
+    int numFrontera;
+    int numCanny;
+
+}StructMap;
 
 class MainWindow : public QMainWindow
 {
@@ -78,6 +84,9 @@ public slots:
     void PintarSegmentado(Mat Img_Dest);
     void PintarFrontera();
     int IdRegiones(int id, Point ori);
+    void Merge();
+    int AnalisisMerge(int id);
+    void UnirRegiones(int id, int id_aux);
 };
 
 

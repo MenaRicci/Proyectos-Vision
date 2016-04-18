@@ -82,9 +82,12 @@ void MainWindow::compute()
     Canny(grayImage,ImagenBordes);
     Segmentacion();
     PuntosFronteras();
+    if(ui->Check_Merge->isChecked()==true)
+        Merge();
     PintarSegmentado(destGrayImage);
     if(ui->Check_Border->isChecked()==true)
         PintarFrontera();
+
 
     ListaRegiones.clear();
     ImagenRegiones.setTo(-1);
@@ -572,14 +575,123 @@ void MainWindow::PintarFrontera(){
     Point aux;
     int size=ListaRegiones.size();
     int sizeFr;
-    //qDebug()<<"Numero de Regiones:" <<size;
     for (int i = 0; i < size ; ++i) {
-        sizeFr=ListaRegiones[i].ListaFrontera.size();
-        //qDebug()<<"Numero de Fronteras:"<<sizeFr;
-        for (int j = 0; j < sizeFr; ++j) {
-            aux=ListaRegiones[i].ListaFrontera[j];
-            visorD->drawEllipse(QPoint(aux.x,aux.y),1,1,Qt::green);
-            //visorD->drawText(QPoint(aux.x,aux.y),"o",3,Qt::green);
+        if(ListaRegiones[i].id!=-1){
+            sizeFr=ListaRegiones[i].ListaFrontera.size();
+            for (int j = 0; j < sizeFr; ++j) {
+                aux=ListaRegiones[i].ListaFrontera[j];
+                visorD->drawEllipse(QPoint(aux.x,aux.y),1,1,Qt::green);
+            }
         }
     }
 }
+
+
+void MainWindow::Merge(){
+    int size=ListaRegiones.size();
+    int id;
+    for (int var = 0; var < size; ++var) {
+        if(ListaRegiones[var].id !=-1){
+            id=AnalisisMerge(var);
+            AnalisisMerge(id);
+        }
+    }
+}
+
+int MainWindow::AnalisisMerge(int id){
+    Point p;
+    int region_local=ListaRegiones[id].id;
+    int size=ListaRegiones[id].ListaFrontera.size();
+    QMap<int, StructMap> mapa;
+    for (int var = 0; var < size; ++var) {
+
+        p=ListaRegiones[id].ListaFrontera[var];
+
+        //ImagenBordes.at<uchar>(Act.y,Act.x)==0
+
+        if(p.y-1>=0 && region_local!= ImagenRegiones.at<int>(p.y-1,p.x)){
+
+            if(mapa.contains(ImagenRegiones.at<int>(p.y-1,p.x))){
+                 mapa[ImagenRegiones.at<int>(p.y-1,p.x)].numFrontera++;
+                if( ImagenBordes.at<uchar>(p.y-1,p.x)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y-1,p.x)].numCanny++;
+            }else{
+                mapa[ImagenRegiones.at<int>(p.y-1,p.x)].numFrontera=1;
+                if( ImagenBordes.at<uchar>(p.y-1,p.x)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y-1,p.x)].numCanny=1;
+            }
+
+        }else if(p.x+1<320 && region_local!= ImagenRegiones.at<int>(p.y,p.x+1) ){
+
+
+
+
+            if(mapa.contains(ImagenRegiones.at<int>(p.y,p.x+1))){
+                 mapa[ImagenRegiones.at<int>(p.y,p.x+1)].numFrontera++;
+                if( ImagenBordes.at<uchar>(p.y,p.x+1)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y,p.x+1)].numCanny++;
+            }else{
+                mapa[ImagenRegiones.at<int>(p.y,p.x+1)].numFrontera=1;
+                if( ImagenBordes.at<uchar>(p.y,p.x+1)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y,p.x+1)].numCanny=1;
+            }
+
+        }else if(p.y+1<240 && region_local!= ImagenRegiones.at<int>(p.y+1,p.x)){
+
+
+
+            if(mapa.contains(ImagenRegiones.at<int>(p.y+1,p.x))){
+                 mapa[ImagenRegiones.at<int>(p.y+1,p.x)].numFrontera++;
+                if( ImagenBordes.at<uchar>(p.y+1,p.x)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y+1,p.x)].numCanny++;
+            }else{
+                mapa[ImagenRegiones.at<int>(p.y+1,p.x)].numFrontera=1;
+                if( ImagenBordes.at<uchar>(p.y+1,p.x)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y+1,p.x)].numCanny=1;
+            }
+
+
+        }else if(p.x-1>=0 && region_local!= ImagenRegiones.at<int>(p.y,p.x-1) ){
+
+            if(mapa.contains(ImagenRegiones.at<int>(p.y,p.x-1))){
+                 mapa[ImagenRegiones.at<int>(p.y,p.x-1)].numFrontera++;
+                if( ImagenBordes.at<uchar>(p.y,p.x-1)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y,p.x-1)].numCanny++;
+            }else{
+                mapa[ImagenRegiones.at<int>(p.y,p.x-1)].numFrontera=1;
+                if( ImagenBordes.at<uchar>(p.y,p.x-1)!=0 || ImagenBordes.at<uchar>(p.y,p.x)!=0)
+                    mapa[ImagenRegiones.at<int>(p.y,p.x-1)].numCanny=1;
+            }
+        }
+    }
+        int Frontera,Canny, value,valor;
+
+        QList<int> ListaKeys=mapa.uniqueKeys();
+
+        for (int var = 0; var <mapa.size(); ++var){
+            value=ListaKeys[var];
+            Frontera=mapa[value].numFrontera;
+            Canny=mapa[value].numCanny;
+            if(Frontera>ListaRegiones[id].ListaFrontera.size()*0.2){
+                valor=(Frontera-Canny)/Frontera;
+                if(valor >= 0.8){
+                //qDebug()<<"Uniendo Regiones";
+                   UnirRegiones(id,value);
+                   AnalisisFrontera(ListaRegiones[id].pOri,id,id);
+                   ListaRegiones[value].id=-1;
+                }
+            }
+        }
+    return 0;
+}
+
+void MainWindow::UnirRegiones(int id, int id_aux){
+    Point P;
+    for (int i = 0; i < 320; ++i)
+        for (int j = 0; j < 240; ++j)
+            if(ImagenRegiones.at<int>(j,i)==id_aux){
+                ImagenRegiones.at<int>(j,i)=id;
+                ListaRegiones[id].numP++;
+            }
+}
+
