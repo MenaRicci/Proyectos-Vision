@@ -687,11 +687,11 @@ int MainWindow::AnalisisMerge(int id){
 
 void MainWindow::UnirRegiones(int id, int id_aux){
     Point P;
+
     for (int i = 0; i < 320; ++i)
         for (int j = 0; j < 240; ++j)
             if(ImagenRegiones.at<int>(j,i)==id_aux){
                 ImagenRegiones.at<int>(j,i)=id;
                 ListaRegiones[id].numP++;
             }
-}
-
+ }
