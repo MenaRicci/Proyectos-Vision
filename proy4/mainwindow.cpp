@@ -64,21 +64,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::compute()
-{
-
-    if(capture && cap->isOpened())
-    {
-        *cap >> colorImage;
-
-        cvtColor(colorImage, grayImage, CV_BGR2GRAY);
-        cvtColor(colorImage, colorImage, CV_BGR2RGB);
-
-    }
-
-
-
-//if(clicked){
+void MainWindow::Practica4(){
     Canny(grayImage,ImagenBordes);
     Segmentacion();
     PuntosFronteras();
@@ -94,7 +80,25 @@ void MainWindow::compute()
     ListaRegiones.clear();
     ImagenRegiones.setTo(-1);
     ImagenVisitados.setTo(0);
-//}
+}
+
+
+void MainWindow::compute()
+{
+
+    if(capture && cap->isOpened())
+    {
+        *cap >> colorImage;
+
+        cvtColor(colorImage, grayImage, CV_BGR2GRAY);
+        cvtColor(colorImage, colorImage, CV_BGR2RGB);
+
+    }
+
+
+
+    Practica4();
+
 
 
     if(showColorImage)
@@ -139,11 +143,9 @@ void MainWindow::start_stop_capture(bool start)
 }
 void MainWindow::load_Image()
 {
-    clicked=false;
 capture=false;
 ui->captureButton->setText("Pulsar Para Capturar");
 loadbool=true;
-//ui->textEdit->setText("Load Image");
 
 QString filters("JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)");
 QString defaultFilter("All files (*.*)");
@@ -219,16 +221,6 @@ void MainWindow::Canny(Mat Img_Source, Mat Img_Dest){
 }
 
 
-/**
- * En la ImagenRegiones si el punto no ha visitado tendra el valor -1
- * Si ha sido visitado y no pertence a region, tendra el valor -2
- * Si ha sido visitado y pertenece a la region del punto inicial, obtendra el valor pasado como parametro (region)
- *
- *
- * @brief MainWindow::AnalisisRegion
- * @param pInicial
- * @param region
- */
 
 void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
 
@@ -245,7 +237,6 @@ void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
         Act=Lista[i];
         i++;
         if(Act.x>=0 && Act.x<320 && Act.y>=0 && Act.y < 240 && ImagenRegiones.at<int>(Act.y,Act.x)==-1){
-                //ImagenRegiones.at<int>(Act.y,Act.x)=-2;
                 grey_act=grayImage.at<uchar>(Act.y,Act.x);
                 if(abs(grey_act-value_grey)<20){
                     ImagenRegiones.at<int>(Act.y,Act.x)=region;
@@ -297,11 +288,10 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
         Act=Lista[i];
         i++;
         if(Act.x>=0 && Act.x<320 && Act.y>=0 && Act.y < 240 && ImagenRegiones.at<int>(Act.y,Act.x)==-1){
-            //ImagenRegiones.at<int>(Act.y,Act.x)=-2;
             grey_act=grayImage.at<uchar>(Act.y,Act.x);
             mediaN=(aux.numP*media+grey_act)/(aux.numP+1);
             varianzaN=(aux.numP*varianza + (grey_act-media)*(grey_act-mediaN))/(aux.numP+1);
-                if(varianzaN<15){//------------FIJAR UMBRAL-------------------------
+                if(varianzaN<15){
                     media=mediaN;
                     varianza=varianzaN;
                     ImagenRegiones.at<int>(Act.y,Act.x)=region;
@@ -323,8 +313,6 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
                         Nuevo.y=Act.y;
                         Lista.push_back(Nuevo);
 
-                    }else{
-                        //aux.ListaFrontera.push_back(Act);
                     }
                 }
 
@@ -366,7 +354,6 @@ void MainWindow::Segmentacion(){
 void MainWindow::PuntosFronteras(){
     Point p;
     int region;
-    //STRegion aux2;
     int size=ListaRegiones.size();
     for (int i = 0; i < size; ++i) {
         if(ListaRegiones[i].id!=-1){
@@ -429,7 +416,6 @@ void MainWindow::AnalisisFrontera(Point p, int region, int ind){
 
 int MainWindow::RegionAfin(Point p){
     int grey_act,greyN,greyE,greyS,greyO;
-   //int greyNE,greySE,greySO,greyNO;
 
     grey_act=grayImage.at<uchar>(p.y,p.x);
     int id=0,aux,menor=grey_act;
@@ -441,26 +427,7 @@ int MainWindow::RegionAfin(Point p){
             id=8;
         }
     }
-/*
-    if(p.y-1>=0 && p.x+1<320){
-        greyNE=grayImage.at<uchar>(p.y-1,p.x+1);
-        aux=abs(greyNE-grey_act);
-        if(aux<menor){
-            menor=aux;
-            id=9;
-        }
-    }
-*/
-    /*
-    if(p.y-1>=0 && p.x-1>=0){
-        greyNO=grayImage.at<uchar>(p.y-1,p.x-1);
-        aux=abs(greyNO-grey_act);
-        if(aux<menor){
-            menor=aux;
-            id=7;
-        }
-    }
-*/
+
     if( p.x+1<320){
         greyE=grayImage.at<uchar>(p.y,p.x+1);
         aux=abs(greyE-grey_act);
@@ -469,16 +436,7 @@ int MainWindow::RegionAfin(Point p){
             id=6;
         }
     }
-/*
-    if(p.y+1<240 && p.x+1<320){
-        greySE=grayImage.at<uchar>(p.y+1,p.x+1);
-        aux=abs(greySE-grey_act);
-        if(aux<menor){
-            menor=aux;
-            id=3;
-        }
-    }
-*/
+
     if(p.y+1<240){
         greyS=grayImage.at<uchar>(p.y+1,p.x);
         aux=abs(greyS-grey_act);
@@ -487,16 +445,6 @@ int MainWindow::RegionAfin(Point p){
             id=2;
         }
     }
-/*
-    if(p.y+1<240 && p.x-1>=0){
-        greySO=grayImage.at<uchar>(p.y+1,p.x-1);
-        aux=abs(greySO-grey_act);
-        if(aux<menor){
-            menor=aux;
-            id=1;
-        }
-    }
-*/
     if(p.x-1>=0){
         greyO=grayImage.at<uchar>(p.y,p.x-1);
         aux=abs(greyO-grey_act);
@@ -597,7 +545,6 @@ void MainWindow::Merge(){
     for (int var = 0; var < size; ++var) {
         if(ListaRegiones[var].id !=-1){
             AnalisisMerge(var);
-           // AnalisisFrontera(ListaRegiones[var].pOri,ListaRegiones[var].id,var);
         }
     }
     PuntosFronteras();
@@ -612,7 +559,6 @@ int MainWindow::AnalisisMerge(int id){
 
         p=ListaRegiones[id].ListaFrontera[var];
 
-        //ImagenBordes.at<uchar>(Act.y,Act.x)==0
 
         if(p.y-1>=0 && region_local!= ImagenRegiones.at<int>(p.y-1,p.x)){
 
@@ -680,9 +626,7 @@ int MainWindow::AnalisisMerge(int id){
             if(Frontera>ListaRegiones[id].ListaFrontera.size()*0.2){
                 valor=(Frontera-Canny)/Frontera;
                 if(valor >= 0.8){
-                //qDebug()<<"Uniendo Regiones";
                    UnirRegiones(id,value);
-                   //AnalisisFrontera(ListaRegiones[id].pOri,id,id);
                    ListaRegiones[value].id=-1;
                 }
             }

@@ -87,6 +87,7 @@ public slots:
     void Merge();
     int AnalisisMerge(int id);
     void UnirRegiones(int id, int id_aux);
+    void Practica4();
 };
 
 
