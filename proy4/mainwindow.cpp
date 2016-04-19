@@ -82,8 +82,10 @@ void MainWindow::compute()
     Canny(grayImage,ImagenBordes);
     Segmentacion();
     PuntosFronteras();
-    if(ui->Check_Merge->isChecked()==true)
+    if(ui->Check_Merge->isChecked()==true){
+        ImagenVisitados.setTo(0);
         Merge();
+    }
     PintarSegmentado(destGrayImage);
     if(ui->Check_Border->isChecked()==true)
         PintarFrontera();
@@ -367,9 +369,11 @@ void MainWindow::PuntosFronteras(){
     //STRegion aux2;
     int size=ListaRegiones.size();
     for (int i = 0; i < size; ++i) {
+        if(ListaRegiones[i].id!=-1){
         p=ListaRegiones[i].pOri;
         region=ListaRegiones[i].id;
         AnalisisFrontera(p, region, i);
+        }
     }
 }
 
@@ -589,13 +593,14 @@ void MainWindow::PintarFrontera(){
 
 void MainWindow::Merge(){
     int size=ListaRegiones.size();
-    int id;
+
     for (int var = 0; var < size; ++var) {
         if(ListaRegiones[var].id !=-1){
-            id=AnalisisMerge(var);
-            AnalisisMerge(id);
+            AnalisisMerge(var);
+           // AnalisisFrontera(ListaRegiones[var].pOri,ListaRegiones[var].id,var);
         }
     }
+    PuntosFronteras();
 }
 
 int MainWindow::AnalisisMerge(int id){
@@ -677,7 +682,7 @@ int MainWindow::AnalisisMerge(int id){
                 if(valor >= 0.8){
                 //qDebug()<<"Uniendo Regiones";
                    UnirRegiones(id,value);
-                   AnalisisFrontera(ListaRegiones[id].pOri,id,id);
+                   //AnalisisFrontera(ListaRegiones[id].pOri,id,id);
                    ListaRegiones[value].id=-1;
                 }
             }
