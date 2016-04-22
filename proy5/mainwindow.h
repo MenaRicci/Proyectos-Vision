@@ -49,10 +49,13 @@ private:
     QTimer timer;
 
     VideoCapture *cap;
-    RCDraw *visorS, *visorD;
-    QImage *imgS, *imgD;
-    Mat colorImage, grayImage, destColorImage, destGrayImage, Black_Color_Image, Black_Gray_Image;
+    RCDraw *visorS, *visorD,*visorS_2, *visorD_2 ;
+    QImage *imgS, *imgD,*imgS_2, *imgD_2;
+    Mat colorImage, grayImage, destColorImage, destGrayImage;
+    Mat colorImage2,grayImage2,destColorImage2,destGrayImage2;
     Mat gray2ColorImage, destGray2ColorImage;
+    Mat gray2ColorImage2, destGray2ColorImage2;
+
     bool capture, showColorImage, winSelected,clicked;
     bool loadbool;
     Rect imageWindow;
@@ -87,7 +90,12 @@ public slots:
     void Merge();
     int AnalisisMerge(int id);
     void UnirRegiones(int id, int id_aux);
-    void Practica4();
+   // void Practica4();
+    void Esquinas(Mat Img_Source);
+    void InitializeDisparity();
+    void PropagateDisparity();
+    void LoadGroundTruth();
+
 };
 
 

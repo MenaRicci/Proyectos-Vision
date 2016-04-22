@@ -15,18 +15,30 @@ MainWindow::MainWindow(QWidget *parent) :
     winSelected = false;
     cap->set(CV_CAP_PROP_FRAME_WIDTH, 320);
     cap->set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+
     imgS = new QImage(320,240, QImage::Format_RGB888);
     visorS = new RCDraw(320,240, imgS, ui->imageFrameS);
     imgD = new QImage(320,240, QImage::Format_RGB888);
     visorD = new RCDraw(320,240, imgD, ui->imageFrameD);
 
+    imgS_2 = new QImage(320,240, QImage::Format_RGB888);
+    visorS_2 = new RCDraw(320,240, imgS_2, ui->imageFrameS_2);
+    imgD_2 = new QImage(320,240, QImage::Format_RGB888);
+    visorD_2 = new RCDraw(320,240, imgD_2, ui->imageFrameD_2);
 
 
     colorImage.create(240,320,CV_8UC3);
     grayImage.create(240,320,CV_8UC1);
     destColorImage.create(240,320,CV_8UC3);
-    Black_Color_Image.create(240,320,CV_8UC3);
-    Black_Gray_Image.create(240,320,CV_8UC1);
+    destGrayImage.create(240,320,CV_8UC1);
+
+
+    colorImage2.create(240,320,CV_8UC3);
+    grayImage2.create(240,320,CV_8UC1);
+    destColorImage2.create(240,320,CV_8UC3);
+    destGrayImage2.create(240,320,CV_8UC1);
+
+
     ImagenRegiones.create(240,320,CV_32SC1);
     ImagenBordes.create(240,320,CV_8UC1);
     ImagenVisitados.create(240,320,CV_32SC1);
@@ -34,15 +46,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ImagenRegiones.setTo(-1);
     ImagenVisitados.setTo(0);
 
-    destGrayImage.create(240,320,CV_8UC1);
     gray2ColorImage.create(240,320,CV_8UC3);
     destGray2ColorImage.create(240,320,CV_8UC3);
 
+
+    gray2ColorImage2.create(240,320,CV_8UC3);
+    destGray2ColorImage2.create(240,320,CV_8UC3);
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
     connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
     connect(ui->colorButton,SIGNAL(clicked(bool)),this,SLOT(change_color_gray(bool)));
     connect(ui->LoadButton,SIGNAL(clicked()),this,SLOT(load_Image()));
+    connect(ui->InitButton,SIGNAL(clicked()),this,SLOT(InitializeDisparity()));
+    connect(ui->PropaButton,SIGNAL(clicked()),this,SLOT(PropagateDisparity()));
+    connect(ui->GroundButton,SIGNAL(clicked()),this,SLOT(LoadGroundTruth()));
+
+
+
 
     clicked=true;
 
@@ -63,7 +83,7 @@ MainWindow::~MainWindow()
     delete imgD;
 
 }
-
+/*
 void MainWindow::Practica4(){
     Canny(grayImage,ImagenBordes);
     Segmentacion();
@@ -81,7 +101,7 @@ void MainWindow::Practica4(){
     ImagenRegiones.setTo(-1);
     ImagenVisitados.setTo(0);
 }
-
+*/
 
 void MainWindow::compute()
 {
@@ -93,25 +113,34 @@ void MainWindow::compute()
         cvtColor(colorImage, grayImage, CV_BGR2GRAY);
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
 
+        //cvtColor(colorImage2,grayImage2,CV_BGR2):
+
     }
 
 
-
-    Practica4();
-
-
+    ui->EstimatedLCD->display(0);
+    if(ui->Check_Corners->isChecked())
+        Esquinas(grayImage);
 
     if(showColorImage)
     {
         memcpy(imgS->bits(), colorImage.data , 320*240*3*sizeof(uchar));
         memcpy(imgD->bits(), destColorImage.data , 320*240*3*sizeof(uchar));
+        memcpy(imgS_2->bits(), colorImage2.data , 320*240*3*sizeof(uchar));
+        memcpy(imgD_2->bits(), destColorImage2.data , 320*240*3*sizeof(uchar));
+
     }
     else
     {
         cvtColor(grayImage,gray2ColorImage, CV_GRAY2RGB);
         cvtColor(destGrayImage,destGray2ColorImage, CV_GRAY2RGB);
+        cvtColor(grayImage2,gray2ColorImage2, CV_GRAY2RGB);
+        cvtColor(destGrayImage2,destGray2ColorImage2, CV_GRAY2RGB);
+
         memcpy(imgS->bits(), gray2ColorImage.data , 320*240*3*sizeof(uchar)); //Pasa el contenido a VisorS
         memcpy(imgD->bits(), destGray2ColorImage.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorD
+        memcpy(imgD_2->bits(), gray2ColorImage2.data , 320*240*3*sizeof(uchar)); //Pasa el contenido a VisorS_2
+        memcpy(imgS_2->bits(), destGray2ColorImage2.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorD_2
 
     }
 
@@ -123,6 +152,8 @@ void MainWindow::compute()
     }
     visorS->update();
     visorD->update();
+    visorS_2->update();
+    visorD_2->update();
 
 
 
@@ -164,11 +195,13 @@ if(fileNames.size()>0){
 
     cv::resize(colorImage,colorImage, Size(320,240),0,0,INTER_LINEAR);
 
-    cvtColor(colorImage, grayImage, CV_BGR2GRAY);
+    cvtColor(colorImage,grayImage, CV_BGR2GRAY);
     cvtColor(colorImage,colorImage, CV_BGR2RGB);
 
     start_stop_capture(false);
-    }
+}else{
+    start_stop_capture(true);
+}
 clicked=true;
 }
 void MainWindow::change_color_gray(bool color)
@@ -219,8 +252,6 @@ void MainWindow::Canny(Mat Img_Source, Mat Img_Dest){
     cv::Canny(Img_Source,Img_Dest,30.0, 120.0);
 
 }
-
-
 
 void MainWindow::AnalisisRegion(Point pInicial,int region,STRegion &aux){
 
@@ -338,9 +369,9 @@ void MainWindow::Segmentacion(){
                 aux.pOri=p;
                 aux.numP=1;
 
-                if(!ui->Check_Statistics->isChecked())
-                    AnalisisRegion(p,contRegion,aux);
-                else
+                //if(!ui->Check_Statistics->isChecked())
+                //    AnalisisRegion(p,contRegion,aux);
+                //else
                     AnalisisRegionEstadistico(p,contRegion,aux);
                 aux.grey=grayImage.at<uchar>(p.y,p.x);
                 ListaRegiones.push_back(aux);
@@ -644,3 +675,55 @@ void MainWindow::UnirRegiones(int id, int id_aux){
                 ListaRegiones[id].numP++;
             }
  }
+
+//--------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------
+
+void MainWindow::Esquinas(Mat Img_Source){
+
+    Mat dst;
+    dst = Mat::zeros( Img_Source.size(), CV_32FC1 );
+
+      /// Detector parameters
+      int blockSize = 2;
+      int apertureSize = 3;
+      double k = 0.04;
+      int cont=0;
+
+      /// Detecting corners
+      cornerHarris( Img_Source, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+
+      /// Drawing a circle around corners
+      for( int j = 0; j < dst.rows ; j++ )
+         { for( int i = 0; i < dst.cols; i++ )
+              {
+                if(  dst.at<float>(j,i) > 0.0001 )
+                  {
+                    cont++;
+                    visorS->drawEllipse(QPoint(i,j),3,3,Qt::green);
+                  }
+              }
+         }
+      ui->EstimatedLCD->display(cont);
+
+}
+
+void MainWindow::InitializeDisparity(){
+
+}
+
+void MainWindow::PropagateDisparity(){
+
+}
+
+void MainWindow::LoadGroundTruth(){
+
+}
+
