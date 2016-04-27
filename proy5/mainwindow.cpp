@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     destGray2ColorImage2.create(240,320,CV_8UC3);
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
-    connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
+    //connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
     connect(ui->colorButton,SIGNAL(clicked(bool)),this,SLOT(change_color_gray(bool)));
     connect(ui->LoadButton,SIGNAL(clicked()),this,SLOT(load_Image()));
     connect(ui->InitButton,SIGNAL(clicked()),this,SLOT(InitializeDisparity()));
@@ -69,6 +69,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(visorS,SIGNAL(windowSelected(QPointF, int, int)),this,SLOT(selectWindow(QPointF, int, int)));
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
     timer.start(60);
+   // showColorImage=true;
+
+/*
+    load_Image(destGrayImage,destColorImage);
+    load_Image(grayImage,colorImage);
+    load_Image(grayImage2,colorImage2);
+    load_Image(destGrayImage2,destColorImage2);
+*/
 
 
 }
@@ -83,25 +91,7 @@ MainWindow::~MainWindow()
     delete imgD;
 
 }
-/*
-void MainWindow::Practica4(){
-    Canny(grayImage,ImagenBordes);
-    Segmentacion();
-    PuntosFronteras();
-    if(ui->Check_Merge->isChecked()==true){
-        ImagenVisitados.setTo(0);
-        Merge();
-    }
-    PintarSegmentado(destGrayImage);
-    if(ui->Check_Border->isChecked()==true)
-        PintarFrontera();
 
-
-    ListaRegiones.clear();
-    ImagenRegiones.setTo(-1);
-    ImagenVisitados.setTo(0);
-}
-*/
 
 void MainWindow::compute()
 {
@@ -112,15 +102,13 @@ void MainWindow::compute()
 
         cvtColor(colorImage, grayImage, CV_BGR2GRAY);
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
-
-        //cvtColor(colorImage2,grayImage2,CV_BGR2):
-
     }
 
 
     ui->EstimatedLCD->display(0);
+     Esquinas();
     if(ui->Check_Corners->isChecked())
-        Esquinas(grayImage);
+       PintarEsquinas();
 
     if(showColorImage)
     {
@@ -139,8 +127,8 @@ void MainWindow::compute()
 
         memcpy(imgS->bits(), gray2ColorImage.data , 320*240*3*sizeof(uchar)); //Pasa el contenido a VisorS
         memcpy(imgD->bits(), destGray2ColorImage.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorD
-        memcpy(imgD_2->bits(), gray2ColorImage2.data , 320*240*3*sizeof(uchar)); //Pasa el contenido a VisorS_2
-        memcpy(imgS_2->bits(), destGray2ColorImage2.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorD_2
+        memcpy(imgS_2->bits(), gray2ColorImage2.data , 320*240*3*sizeof(uchar)); //Pasa el contenido a VisorD_2
+        memcpy(imgD_2->bits(), destGray2ColorImage2.data , 320*240*3*sizeof(uchar));//Pasa el contenido a VisorS_2
 
     }
 
@@ -180,15 +168,17 @@ loadbool=true;
 
 QString filters("JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)");
 QString defaultFilter("All files (*.*)");
-
 QFileDialog fileDialog(0, "Open file", "/home/guille/Escritorio", filters);
 fileDialog.selectNameFilter(defaultFilter);
+fileDialog.setFileMode(QFileDialog::ExistingFiles);
+
+
 QStringList fileNames;
 if (fileDialog.exec())
     fileNames = fileDialog.selectedFiles();
 
 
-if(fileNames.size()>0){
+if(fileNames.size()>1){
     QString File=fileNames.front();
     fileNames.pop_front();
     colorImage=imread(File.toStdString());
@@ -198,12 +188,28 @@ if(fileNames.size()>0){
     cvtColor(colorImage,grayImage, CV_BGR2GRAY);
     cvtColor(colorImage,colorImage, CV_BGR2RGB);
 
+    File=fileNames.front();
+    fileNames.pop_front();
+    destColorImage=imread(File.toStdString());
+
+    cv::resize(destColorImage,destColorImage, Size(320,240),0,0,INTER_LINEAR);
+
+    cvtColor(destColorImage,destGrayImage, CV_BGR2GRAY);
+    cvtColor(destColorImage,destColorImage, CV_BGR2RGB);
+
+
+
     start_stop_capture(false);
 }else{
     start_stop_capture(true);
 }
 clicked=true;
 }
+
+
+
+
+
 void MainWindow::change_color_gray(bool color)
 {
     if(color)
@@ -686,10 +692,13 @@ void MainWindow::UnirRegiones(int id, int id_aux){
 
 //--------------------------------------------------------------------------------------
 
-void MainWindow::Esquinas(Mat Img_Source){
+void MainWindow::Esquinas(){
 
     Mat dst;
-    dst = Mat::zeros( Img_Source.size(), CV_32FC1 );
+    ListaEsquinasDRC.clear();
+    ListaEsquinasIZQ.clear();
+
+    dst = Mat::zeros( grayImage.size(), CV_32FC1 );
 
       /// Detector parameters
       int blockSize = 2;
@@ -698,7 +707,7 @@ void MainWindow::Esquinas(Mat Img_Source){
       int cont=0;
 
       /// Detecting corners
-      cornerHarris( Img_Source, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+      cornerHarris( grayImage, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
 
       /// Drawing a circle around corners
       for( int j = 0; j < dst.rows ; j++ )
@@ -707,7 +716,9 @@ void MainWindow::Esquinas(Mat Img_Source){
                 if(  dst.at<float>(j,i) > 0.0001 )
                   {
                     cont++;
-                    visorS->drawEllipse(QPoint(i,j),3,3,Qt::green);
+                    ListaEsquinasIZQ.push_back(QPoint(i,j));
+
+                    //visorS->drawEllipse(QPoint(i,j),3,3,Qt::green);
                   }
               }
          }
@@ -724,6 +735,129 @@ void MainWindow::PropagateDisparity(){
 }
 
 void MainWindow::LoadGroundTruth(){
+
+    capture=false;
+    ui->captureButton->setText("Pulsar Para Capturar");
+    loadbool=true;
+
+    QString filters("JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)");
+    QString defaultFilter("All files (*.*)");
+    QFileDialog fileDialog(0, "Cargar Ground Truth", "/home/guille/Escritorio", filters);
+    fileDialog.selectNameFilter(defaultFilter);
+    fileDialog.setFileMode(QFileDialog::ExistingFiles);
+
+
+    QStringList fileNames;
+    if (fileDialog.exec())
+        fileNames = fileDialog.selectedFiles();
+
+
+    if(fileNames.size()>0){
+        QString File=fileNames.front();
+        fileNames.pop_front();
+        destColorImage2=imread(File.toStdString());
+
+        cv::resize(destColorImage2,destColorImage2, Size(320,240),0,0,INTER_LINEAR);
+
+        cvtColor(destColorImage2,destGrayImage2, CV_BGR2GRAY);
+        cvtColor(destColorImage2,destColorImage2, CV_BGR2RGB);
+    }
+}
+void MainWindow::PintarEsquinas(){
+    int sizeD=ListaEsquinasDRC.size();
+    int sizeI=ListaEsquinasIZQ.size();
+    for (int i = 0; i <sizeD; ++i) {
+        visorD->drawEllipse(ListaEsquinasDRC[i],2,2,Qt::green);
+    }
+    for (int i = 0; i <sizeI; ++i) {
+        visorS->drawEllipse(ListaEsquinasIZQ[i],2,2,Qt::green);
+    }
+}
+
+
+
+
+void MainWindow::nonMaximaSuppression(const Mat& src, const int sz, Mat& dst, const Mat mask) {
+
+
+    // initialise the block mask and destination
+
+
+    const int M = src.rows;
+
+
+    const int N = src.cols;
+
+    const bool masked = !mask.empty();
+
+
+    Mat block = 255*Mat_<uint8_t>::ones(Size(2*sz+1,2*sz+1));
+
+
+    dst = Mat_<uint8_t>::zeros(src.size());
+
+
+    // iterate over image blocks
+
+
+    for (int m = 0; m < M; m+=sz+1) {
+
+
+        for (int n = 0; n < N; n+=sz+1) {
+
+            Point  ijmax;
+
+            double vcmax, vnmax;
+
+            // get the maximal candidate within the block
+
+            Range ic(m, min(m+sz+1,M));
+
+            Range jc(n, min(n+sz+1,N));
+
+            minMaxLoc(src(ic,jc), NULL, &vcmax, NULL, &ijmax, masked ? mask(ic,jc) : noArray());
+
+            Point cc = ijmax + Point(jc.start,ic.start);
+
+            // search the neighbours centered around the candidate for the true maxima
+
+            Range in(max(cc.y-sz,0), min(cc.y+sz+1,M));
+
+            Range jn(max(cc.x-sz,0), min(cc.x+sz+1,N));
+
+
+            // mask out the block whose maxima we already know
+
+            Mat_<uint8_t> blockmask;
+
+            block(Range(0,in.size()), Range(0,jn.size())).copyTo(blockmask);
+
+            Range iis(ic.start-in.start, min(ic.start-in.start+sz+1, in.size()));
+
+            Range jis(jc.start-jn.start, min(jc.start-jn.start+sz+1, jn.size()));
+
+            blockmask(iis, jis) = Mat_<uint8_t>::zeros(Size(jis.size(),iis.size()));
+
+            minMaxLoc(src(in,jn), NULL, &vnmax, NULL, &ijmax, masked ? mask(in,jn).mul(blockmask) : blockmask);
+
+            ijmax + Point(jn.start, in.start);
+
+            // if the block centre is also the neighbour centre, then it's a local maxima
+
+            if (vcmax > vnmax) {
+
+                    dst.at<uint8_t>(cc.y, cc.x) = 255;
+
+
+
+            }
+
+
+        }
+
+
+
+    }
 
 }
 

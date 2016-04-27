@@ -61,10 +61,18 @@ private:
     Rect imageWindow;
 
     std::vector<STRegion> ListaRegiones;
+    std::vector<QPoint> ListaEsquinasIZQ;
+    std::vector<QPoint> ListaEsquinasDRC;
     Mat ImagenRegiones;
     Mat ImagenBordes;
     Mat ImagenVisitados;
 
+public:
+
+    void load_Image(Mat greyImage,Mat colorImage);
+    void PintarEsquinas();
+    void Esquinas();
+    void nonMaximaSuppression(const Mat& src, const int sz, Mat& dst, const Mat mask);
 
 
 public slots:
@@ -91,11 +99,9 @@ public slots:
     int AnalisisMerge(int id);
     void UnirRegiones(int id, int id_aux);
    // void Practica4();
-    void Esquinas(Mat Img_Source);
     void InitializeDisparity();
     void PropagateDisparity();
     void LoadGroundTruth();
-
 };
 
 
