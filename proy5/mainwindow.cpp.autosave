@@ -759,7 +759,10 @@ void MainWindow::matching(){
 }
 
 void MainWindow::InitializeDisparity(){
-    Esquinas();
+ Esquinas();
+ Segmentacion();
+
+
 }
 
 void MainWindow::PropagateDisparity(){

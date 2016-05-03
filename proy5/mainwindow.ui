@@ -153,6 +153,9 @@
    <property name="text">
     <string>Initialize Disparity</string>
    </property>
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="PropaButton">
    <property name="geometry">
