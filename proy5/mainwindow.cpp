@@ -695,8 +695,7 @@ void MainWindow::UnirRegiones(int id, int id_aux){
 void MainWindow::Esquinas(){
 
     Mat dst;
-    ListaEsquinasDRC.clear();
-    ListaEsquinasIZQ.clear();
+    ListaEsquinas.clear();
 
     dst = Mat::zeros( grayImage.size(), CV_32FC1 );
 
@@ -704,7 +703,7 @@ void MainWindow::Esquinas(){
       int blockSize = 2;
       int apertureSize = 3;
       double k = 0.04;
-      int cont=0;
+      StructEsquina aux;
 
       /// Detecting corners
       cornerHarris( grayImage, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
@@ -713,17 +712,16 @@ void MainWindow::Esquinas(){
       for( int j = 0; j < dst.rows ; j++ )
          { for( int i = 0; i < dst.cols; i++ )
               {
-                if(  dst.at<float>(j,i) > 0.0001 )
+                if(  dst.at<float>(j,i) > 0.000001 )//incluir que no se salga de la ventana de busqueda
                   {
-                    cont++;
-                    ListaEsquinasIZQ.push_back(QPoint(i,j));
-
-                    //visorS->drawEllipse(QPoint(i,j),3,3,Qt::green);
+                    aux.mCorner=dst.at<float>(j,i);
+                    aux.P.setX(i);
+                    aux.P.setY(j);
+                    ListaEsquinas.push_back(aux);
                   }
               }
          }
-      ui->EstimatedLCD->display(cont);
-
+      nonMaximaSuppression();
 }
 
 void MainWindow::InitializeDisparity(){
@@ -763,101 +761,37 @@ void MainWindow::LoadGroundTruth(){
         cvtColor(destColorImage2,destColorImage2, CV_BGR2RGB);
     }
 }
+
 void MainWindow::PintarEsquinas(){
-    int sizeD=ListaEsquinasDRC.size();
-    int sizeI=ListaEsquinasIZQ.size();
-    for (int i = 0; i <sizeD; ++i) {
-        visorD->drawEllipse(ListaEsquinasDRC[i],2,2,Qt::green);
-    }
+    int sizeI=ListaEsquinas.size();
+
     for (int i = 0; i <sizeI; ++i) {
-        visorS->drawEllipse(ListaEsquinasIZQ[i],2,2,Qt::green);
+        visorS->drawEllipse(ListaEsquinas[i].P,2,2,Qt::green);
     }
 }
 
+bool FuncionOrdenacion(StructEsquina i, StructEsquina j){
+    return (i.mCorner>j.mCorner);
+}
 
+void MainWindow::nonMaximaSuppression(){
+    int size=ListaEsquinas.size();
+    QPoint p,aux;
 
+    std::sort(ListaEsquinas.begin(),ListaEsquinas.end(),FuncionOrdenacion);
 
-void MainWindow::nonMaximaSuppression(const Mat& src, const int sz, Mat& dst, const Mat mask) {
-
-
-    // initialise the block mask and destination
-
-
-    const int M = src.rows;
-
-
-    const int N = src.cols;
-
-    const bool masked = !mask.empty();
-
-
-    Mat block = 255*Mat_<uint8_t>::ones(Size(2*sz+1,2*sz+1));
-
-
-    dst = Mat_<uint8_t>::zeros(src.size());
-
-
-    // iterate over image blocks
-
-
-    for (int m = 0; m < M; m+=sz+1) {
-
-
-        for (int n = 0; n < N; n+=sz+1) {
-
-            Point  ijmax;
-
-            double vcmax, vnmax;
-
-            // get the maximal candidate within the block
-
-            Range ic(m, min(m+sz+1,M));
-
-            Range jc(n, min(n+sz+1,N));
-
-            minMaxLoc(src(ic,jc), NULL, &vcmax, NULL, &ijmax, masked ? mask(ic,jc) : noArray());
-
-            Point cc = ijmax + Point(jc.start,ic.start);
-
-            // search the neighbours centered around the candidate for the true maxima
-
-            Range in(max(cc.y-sz,0), min(cc.y+sz+1,M));
-
-            Range jn(max(cc.x-sz,0), min(cc.x+sz+1,N));
-
-
-            // mask out the block whose maxima we already know
-
-            Mat_<uint8_t> blockmask;
-
-            block(Range(0,in.size()), Range(0,jn.size())).copyTo(blockmask);
-
-            Range iis(ic.start-in.start, min(ic.start-in.start+sz+1, in.size()));
-
-            Range jis(jc.start-jn.start, min(jc.start-jn.start+sz+1, jn.size()));
-
-            blockmask(iis, jis) = Mat_<uint8_t>::zeros(Size(jis.size(),iis.size()));
-
-            minMaxLoc(src(in,jn), NULL, &vnmax, NULL, &ijmax, masked ? mask(in,jn).mul(blockmask) : blockmask);
-
-            ijmax + Point(jn.start, in.start);
-
-            // if the block centre is also the neighbour centre, then it's a local maxima
-
-            if (vcmax > vnmax) {
-
-                    dst.at<uint8_t>(cc.y, cc.x) = 255;
-
-
-
-            }
-
-
+    float dist;
+    for (int i = 0; i < size; ++i) {
+        p=ListaEsquinas[i].P;
+        for (int j = i+1; j < size; ++j) {
+           aux=ListaEsquinas[j].P;
+           dist=sqrt( pow(p.x()-aux.x(),2) + pow(p.y()-aux.y(),2) );
+           if(dist<=5){
+               ListaEsquinas.erase(ListaEsquinas.begin()+j);
+               j--;
+           }
+           size=ListaEsquinas.size();
         }
-
-
-
     }
-
+    ui->EstimatedLCD->display(size);
 }
-

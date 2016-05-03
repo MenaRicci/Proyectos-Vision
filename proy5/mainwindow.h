@@ -35,6 +35,12 @@ typedef struct{
 
 }StructMap;
 
+typedef struct{
+    QPoint P;
+    float mCorner;
+
+}StructEsquina;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -61,8 +67,7 @@ private:
     Rect imageWindow;
 
     std::vector<STRegion> ListaRegiones;
-    std::vector<QPoint> ListaEsquinasIZQ;
-    std::vector<QPoint> ListaEsquinasDRC;
+    std::vector<StructEsquina> ListaEsquinas;
     Mat ImagenRegiones;
     Mat ImagenBordes;
     Mat ImagenVisitados;
@@ -72,7 +77,9 @@ public:
     void load_Image(Mat greyImage,Mat colorImage);
     void PintarEsquinas();
     void Esquinas();
-    void nonMaximaSuppression(const Mat& src, const int sz, Mat& dst, const Mat mask);
+    void nonMaximaSuppression();
+    void GetSubMat();
+    void matching();
 
 
 public slots:

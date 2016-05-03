@@ -6,7 +6,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../proy4/mainwindow.h"
+#include "../proy5/mainwindow.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'mainwindow.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      21,   14, // methods
+      23,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -51,6 +51,8 @@ static const uint qt_meta_data_MainWindow[] = {
      492,  489,  380,   11, 0x0a,
      521,  511,   11,   11, 0x0a,
      543,   11,   11,   11, 0x0a,
+     565,   11,   11,   11, 0x0a,
+     586,   11,   11,   11, 0x0a,
 
        0        // eod
 };
@@ -71,7 +73,8 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "PintarSegmentado(Mat)\0PintarFrontera()\0"
     "id,ori\0IdRegiones(int,Point)\0Merge()\0"
     "id\0AnalisisMerge(int)\0id,id_aux\0"
-    "UnirRegiones(int,int)\0Practica4()\0"
+    "UnirRegiones(int,int)\0InitializeDisparity()\0"
+    "PropagateDisparity()\0LoadGroundTruth()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -103,7 +106,9 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 18: { int _r = _t->AnalisisMerge((*reinterpret_cast< int(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
         case 19: _t->UnirRegiones((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 20: _t->Practica4(); break;
+        case 20: _t->InitializeDisparity(); break;
+        case 21: _t->PropagateDisparity(); break;
+        case 22: _t->LoadGroundTruth(); break;
         default: ;
         }
     }
@@ -141,9 +146,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 21)
+        if (_id < 23)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 21;
+        _id -= 23;
     }
     return _id;
 }
