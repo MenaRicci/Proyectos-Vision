@@ -368,6 +368,9 @@ void MainWindow::Segmentacion(){
     STRegion aux;
     for (int i = 0; i < 240; ++i) {
         for (int j = 0; j < 320; ++j) {
+            /*
+             * MODIFICAR PARA SEGMENTACION POR ESQUINAS
+            */
             if(ImagenRegiones.at<int>(i,j)==-1){
                 aux.id=contRegion;
                 p.x=j;
@@ -375,10 +378,7 @@ void MainWindow::Segmentacion(){
                 aux.pOri=p;
                 aux.numP=1;
 
-                //if(!ui->Check_Statistics->isChecked())
-                //    AnalisisRegion(p,contRegion,aux);
-                //else
-                    AnalisisRegionEstadistico(p,contRegion,aux);
+                AnalisisRegionEstadistico(p,contRegion,aux);
                 aux.grey=grayImage.at<uchar>(p.y,p.x);
                 ListaRegiones.push_back(aux);
                 contRegion++;
@@ -712,11 +712,7 @@ void MainWindow::Esquinas(){
       for( int j = 0; j < dst.rows ; j++ )
          { for( int i = 0; i < dst.cols; i++ )
               {
-<<<<<<< HEAD
                 if(  dst.at<float>(j,i) > 0.000001 && ( j>=VentanaMaxima && j< dst.rows-VentanaMaxima) && (i>=VentanaMaxima && i < dst.cols - VentanaMaxima)  )//incluir que no se salga de la ventana de busqueda
-=======
-                if(  dst.at<float>(j,i) > 0.000001 )//incluir que no se salga de la ventana de busqueda
->>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
                   {
                     aux.mCorner=dst.at<float>(j,i);
                     aux.P.setX(i);
@@ -726,7 +722,6 @@ void MainWindow::Esquinas(){
               }
          }
       nonMaximaSuppression();
-<<<<<<< HEAD
       matching();
 }
 
@@ -745,7 +740,7 @@ void MainWindow::matching(){
 
         Origen = grayImage.colRange(P.x()-VentanaMaxima,P.x()+VentanaMaxima).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
 
-        Fila   = destGrayImage.colRange(0,320).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
+        Fila   = destGrayImage.colRange(0,P.x()).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima); //AMPLIACION
 
         matchTemplate(Fila,Origen,Destino,CV_TM_CCOEFF_NORMED);
         minMaxLoc( Destino, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
@@ -761,12 +756,13 @@ void MainWindow::matching(){
     }
 
 
-=======
->>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
 }
 
 void MainWindow::InitializeDisparity(){
-    Esquinas();
+ Esquinas();
+ Segmentacion();
+
+
 }
 
 void MainWindow::PropagateDisparity(){
@@ -805,7 +801,6 @@ void MainWindow::LoadGroundTruth(){
 
 void MainWindow::PintarEsquinas(){
     int sizeI=ListaEsquinas.size();
-<<<<<<< HEAD
 QPoint P;
     for (int i = 0; i <sizeI; ++i) {
         if(ListaEsquinas[i].homol==true){
@@ -817,11 +812,6 @@ QPoint P;
         }else
             visorS->drawEllipse(ListaEsquinas[i].P,2,2,Qt::red);
 
-=======
-
-    for (int i = 0; i <sizeI; ++i) {
-        visorS->drawEllipse(ListaEsquinas[i].P,2,2,Qt::green);
->>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
     }
 }
 
@@ -847,10 +837,6 @@ void MainWindow::nonMaximaSuppression(){
            }
            size=ListaEsquinas.size();
         }
-<<<<<<< HEAD
     }    
-=======
-    }
->>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
     ui->EstimatedLCD->display(size);
 }

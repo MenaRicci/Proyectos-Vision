@@ -37,14 +37,10 @@ typedef struct{
 
 typedef struct{
     QPoint P;
-<<<<<<< HEAD
     Point P2;
-    float mCorner;
     bool homol;
-=======
     float mCorner;
 
->>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
 }StructEsquina;
 
 class MainWindow : public QMainWindow
@@ -59,8 +55,9 @@ private:
     Ui::MainWindow *ui;
     int numFoto;
     QTimer timer;
+    int VentanaMaxima;
 
-    Mat Disparidad,Fijos;
+    Mat Fijos, Disparidad;
 
     VideoCapture *cap;
     RCDraw *visorS, *visorD,*visorS_2, *visorD_2 ;
@@ -73,7 +70,6 @@ private:
     bool capture, showColorImage, winSelected,clicked;
     bool loadbool;
     Rect imageWindow;
-    int VentanaMaxima;
 
     std::vector<STRegion> ListaRegiones;
     std::vector<StructEsquina> ListaEsquinas;
