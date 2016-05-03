@@ -37,9 +37,14 @@ typedef struct{
 
 typedef struct{
     QPoint P;
+<<<<<<< HEAD
     Point P2;
     float mCorner;
     bool homol;
+=======
+    float mCorner;
+
+>>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
 }StructEsquina;
 
 class MainWindow : public QMainWindow

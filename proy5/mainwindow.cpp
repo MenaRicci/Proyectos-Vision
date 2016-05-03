@@ -712,7 +712,11 @@ void MainWindow::Esquinas(){
       for( int j = 0; j < dst.rows ; j++ )
          { for( int i = 0; i < dst.cols; i++ )
               {
+<<<<<<< HEAD
                 if(  dst.at<float>(j,i) > 0.000001 && ( j>=VentanaMaxima && j< dst.rows-VentanaMaxima) && (i>=VentanaMaxima && i < dst.cols - VentanaMaxima)  )//incluir que no se salga de la ventana de busqueda
+=======
+                if(  dst.at<float>(j,i) > 0.000001 )//incluir que no se salga de la ventana de busqueda
+>>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
                   {
                     aux.mCorner=dst.at<float>(j,i);
                     aux.P.setX(i);
@@ -722,6 +726,7 @@ void MainWindow::Esquinas(){
               }
          }
       nonMaximaSuppression();
+<<<<<<< HEAD
       matching();
 }
 
@@ -756,6 +761,8 @@ void MainWindow::matching(){
     }
 
 
+=======
+>>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
 }
 
 void MainWindow::InitializeDisparity(){
@@ -798,6 +805,7 @@ void MainWindow::LoadGroundTruth(){
 
 void MainWindow::PintarEsquinas(){
     int sizeI=ListaEsquinas.size();
+<<<<<<< HEAD
 QPoint P;
     for (int i = 0; i <sizeI; ++i) {
         if(ListaEsquinas[i].homol==true){
@@ -809,6 +817,11 @@ QPoint P;
         }else
             visorS->drawEllipse(ListaEsquinas[i].P,2,2,Qt::red);
 
+=======
+
+    for (int i = 0; i <sizeI; ++i) {
+        visorS->drawEllipse(ListaEsquinas[i].P,2,2,Qt::green);
+>>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
     }
 }
 
@@ -834,6 +847,10 @@ void MainWindow::nonMaximaSuppression(){
            }
            size=ListaEsquinas.size();
         }
+<<<<<<< HEAD
     }    
+=======
+    }
+>>>>>>> 026a8108ff0de1da694145de9d2d0c9fc8635e83
     ui->EstimatedLCD->display(size);
 }
