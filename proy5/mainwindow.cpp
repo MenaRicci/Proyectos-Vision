@@ -375,7 +375,7 @@ void MainWindow::Segmentacion(){
                 aux.numP=1;
                 aux.disp=0;
                 aux.nFijos=0;
-                AnalisisRegionEstadistico(p,contRegion,aux);
+                AnalisisRegion(p,contRegion,aux);
                 aux.grey=grayImage.at<uchar>(p.y,p.x);
                 ListaRegiones.push_back(aux);
                 contRegion++;
@@ -772,6 +772,7 @@ void MainWindow::matching(){
 void MainWindow::InitializeDisparity(){
     Canny(grayImage,ImagenBordes);
     Segmentacion();
+    Merge();
     Esquinas();
     PintarSegmentado(grayImage2);
 
