@@ -197,8 +197,6 @@ if(fileNames.size()>1){
     cvtColor(destColorImage,destGrayImage, CV_BGR2GRAY);
     cvtColor(destColorImage,destColorImage, CV_BGR2RGB);
 
-
-
     start_stop_capture(false);
 }
 else{
