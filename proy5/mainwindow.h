@@ -26,6 +26,8 @@ typedef struct{
     int numP;
     uchar grey;
     std::vector<Point> ListaFrontera;
+    float disp;
+    int nFijos;
 
 }STRegion;
 
@@ -56,7 +58,7 @@ private:
     int numFoto;
     QTimer timer;
     int VentanaMaxima;
-
+    int AnchoImagOri;
     Mat Fijos, Disparidad;
 
     VideoCapture *cap;

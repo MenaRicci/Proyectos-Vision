@@ -182,7 +182,7 @@ if(fileNames.size()>1){
     QString File=fileNames.front();
     fileNames.pop_front();
     colorImage=imread(File.toStdString());
-
+    AnchoImagOri=colorImage.cols;
     cv::resize(colorImage,colorImage, Size(320,240),0,0,INTER_LINEAR);
 
     cvtColor(colorImage,grayImage, CV_BGR2GRAY);
@@ -367,16 +367,14 @@ void MainWindow::Segmentacion(){
     STRegion aux;
     for (int i = 0; i < 240; ++i) {
         for (int j = 0; j < 320; ++j) {
-            /*
-             * MODIFICAR PARA SEGMENTACION POR ESQUINAS
-            */
             if(ImagenRegiones.at<int>(i,j)==-1){
                 aux.id=contRegion;
                 p.x=j;
                 p.y=i;
                 aux.pOri=p;
                 aux.numP=1;
-
+                aux.disp=0;
+                aux.nFijos=0;
                 AnalisisRegionEstadistico(p,contRegion,aux);
                 aux.grey=grayImage.at<uchar>(p.y,p.x);
                 ListaRegiones.push_back(aux);
@@ -545,13 +543,24 @@ void MainWindow::PuntosNegros(){
 
 void MainWindow::PintarSegmentado(Mat Img_Dest){
     int region;
-    uchar grey;
+    float disparidad,grey;
 
     for (int i = 0; i < 240; ++i) {
         for (int j = 0; j < 320; ++j) {
-            region=ImagenRegiones.at<int>(i,j);
-            grey=ListaRegiones[region].grey;
+            if(Fijos.at<uchar>(i,j)==1){
+                disparidad=Disparidad.at<float>(i,j);
+            }else{
+                region=ImagenRegiones.at<int>(i,j);
+                if(ListaRegiones[region].nFijos!=0){
+                     disparidad=(ListaRegiones[region].disp/ListaRegiones[region].nFijos);
+                }else{
+                    disparidad=0;
+                }
+            }
+            grey=(3*disparidad*AnchoImagOri)/320;
+            if(grey>255) grey=255;
             Img_Dest.at<uchar>(i,j)=grey;
+            Disparidad.at<float>(i,j)=grey;
 
         }
     }
@@ -726,7 +735,7 @@ void MainWindow::Esquinas(){
 
 void MainWindow::matching(){
 
-    int size=ListaEsquinas.size();
+    int size=ListaEsquinas.size(),id;
     Mat Origen;
     Mat Fila;
     Mat Destino;
@@ -750,6 +759,9 @@ void MainWindow::matching(){
             ListaEsquinas[i].homol=true;
             Fijos.at<uchar>(P.y(),P.x())=1;
             Disparidad.at<float>(P.y(),P.x())=P.x()-ListaEsquinas[i].P2.x;
+            id=ImagenRegiones.at<int>(P.y(),P.x());
+            ListaRegiones[id].disp+=Disparidad.at<float>(P.y(),P.x());
+            ListaRegiones[id].nFijos++;
         }else
             ListaEsquinas[i].homol=false;
     }
@@ -758,8 +770,10 @@ void MainWindow::matching(){
 }
 
 void MainWindow::InitializeDisparity(){
- Esquinas();
- Segmentacion();
+    Canny(grayImage,ImagenBordes);
+    Segmentacion();
+    Esquinas();
+    PintarSegmentado(grayImage2);
 
 
 }
