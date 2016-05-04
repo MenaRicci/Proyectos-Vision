@@ -200,7 +200,8 @@ if(fileNames.size()>1){
 
 
     start_stop_capture(false);
-}else{
+}
+else{
     start_stop_capture(true);
 }
 clicked=true;
