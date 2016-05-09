@@ -66,8 +66,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->colorButton,SIGNAL(clicked(bool)),this,SLOT(change_color_gray(bool)));
     connect(ui->LoadButton,SIGNAL(clicked()),this,SLOT(load_Image()));
     connect(ui->InitButton,SIGNAL(clicked()),this,SLOT(InitializeDisparity()));
-    connect(ui->PropaButton,SIGNAL(clicked()),this,SLOT(PropagateDisparity()));
+   // connect(ui->PropaButton,SIGNAL(clicked()),this,SLOT(PropagateDisparity()));
     connect(ui->GroundButton,SIGNAL(clicked()),this,SLOT(LoadGroundTruth()));
+
+
+   ListaVentanas.push_back(3);
+   ListaVentanas.push_back(5);
+   ListaVentanas.push_back(7);
+   ListaVentanas.push_back(9);
+   ListaVentanas.push_back(11);
+   ListaVentanas.push_back(13);
+   ListaVentanas.push_back(15);
 
 
 
@@ -76,9 +85,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(visorS,SIGNAL(windowSelected(QPointF, int, int)),this,SLOT(selectWindow(QPointF, int, int)));
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
+    connect(visorS_2,SIGNAL(windowSelected(QPointF,int,int)),this,SLOT(GetDisparity(QPointF)));
     timer.start(60);
 
-    VentanaMaxima=9/2;
+    VentanaMaxima=13/2;
     load_Image();
 
 }
@@ -107,11 +117,13 @@ void MainWindow::compute()
     }
 
 
-    ui->EstimatedLCD->display(0);
+   // ui->EstimatedLCD->display(0);
 
 
     if(ui->Check_Corners->isChecked())
        PintarEsquinas();
+    if(ui->PropaButton->isChecked())
+        PropagateDisparity();
 
     if(showColorImage)
     {
@@ -160,15 +172,36 @@ void MainWindow::start_stop_capture(bool start)
         capture = false;
     }
 }
+
+void MainWindow::clear(){
+    grayImage.setTo(0);
+    destGrayImage.setTo(0);
+    grayImage2.setTo(0);
+    destGrayImage2.setTo(0);
+    Disparidad.setTo(0);
+    ImagenBordes.setTo(0);
+    ImagenRegiones.setTo(-1);
+    ImagenVisitados.setTo(0);
+    Fijos.setTo(0);
+
+    ListaEsquinas.clear();
+    ListaRegiones.clear();
+
+}
+
 void MainWindow::load_Image()
 {
+
+    clear();
+
+
 capture=false;
 ui->captureButton->setText("Pulsar Para Capturar");
 loadbool=true;
 
 QString filters("JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)");
 QString defaultFilter("All files (*.*)");
-QFileDialog fileDialog(0, "Open file", "/home/guille/Escritorio", filters);
+QFileDialog fileDialog(0, "Open file", "/home/guille/Escritorio/Images", filters);
 fileDialog.selectNameFilter(defaultFilter);
 fileDialog.setFileMode(QFileDialog::ExistingFiles);
 
@@ -363,6 +396,7 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
 
 void MainWindow::Segmentacion(){
     Point p;
+    ListaRegiones.clear();
     int contRegion=0;
     STRegion aux;
     for (int i = 0; i < 240; ++i) {
@@ -542,26 +576,13 @@ void MainWindow::PuntosNegros(){
 
 
 void MainWindow::PintarSegmentado(Mat Img_Dest){
-    int region;
     float disparidad,grey;
-
     for (int i = 0; i < 240; ++i) {
         for (int j = 0; j < 320; ++j) {
-            if(Fijos.at<uchar>(i,j)==1){
-                disparidad=Disparidad.at<float>(i,j);
-            }else{
-                region=ImagenRegiones.at<int>(i,j);
-                if(ListaRegiones[region].nFijos!=0){
-                     disparidad=(ListaRegiones[region].disp/ListaRegiones[region].nFijos);
-                }else{
-                    disparidad=0;
-                }
-            }
+            disparidad=Disparidad.at<float>(i,j);
             grey=(3*disparidad*AnchoImagOri)/320;
             if(grey>255) grey=255;
             Img_Dest.at<uchar>(i,j)=grey;
-            Disparidad.at<float>(i,j)=grey;
-
         }
     }
 }
@@ -736,32 +757,57 @@ void MainWindow::Esquinas(){
 void MainWindow::matching(){
 
     int size=ListaEsquinas.size(),id;
-    Mat Origen;
-    Mat Fila;
-    Mat Destino;
+    Mat Origen,Origen2;
+    Mat Fila,Fila2;
+    Mat Destino,Destino2;
     QPoint P;
-    double minVal,maxVal;
-    Point minLoc,maxLoc;
+    double minVal,maxVal,minVal2,maxVal2;
+    Point minLoc,maxLoc,minLoc2,maxLoc2;
 
     for (int i = 0; i < size; ++i) {
         P=ListaEsquinas[i].P;
 
         Origen = grayImage.colRange(P.x()-VentanaMaxima,P.x()+VentanaMaxima).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
-
         Fila   = destGrayImage.colRange(0,P.x()).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima); //AMPLIACION
-
         matchTemplate(Fila,Origen,Destino,CV_TM_CCOEFF_NORMED);
         minMaxLoc( Destino, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
-        if(maxVal>=0.9){
-            ListaEsquinas[i].P2=maxLoc;
-            ListaEsquinas[i].P2.y=P.y();
-            ListaEsquinas[i].P2.x+=VentanaMaxima;
-            ListaEsquinas[i].homol=true;
-            Fijos.at<uchar>(P.y(),P.x())=1;
-            Disparidad.at<float>(P.y(),P.x())=P.x()-ListaEsquinas[i].P2.x;
-            id=ImagenRegiones.at<int>(P.y(),P.x());
-            ListaRegiones[id].disp+=Disparidad.at<float>(P.y(),P.x());
-            ListaRegiones[id].nFijos++;
+
+        if(maxVal>=0.95){
+           if(maxLoc.x >= 0 && maxLoc.x + 2*VentanaMaxima <320){
+                qDebug()<<"HOMO";
+                Origen2 = destGrayImage.colRange(maxLoc.x,maxLoc.x+2*VentanaMaxima).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
+                //Fila2   = grayImage.colRange(maxLoc.x+VentanaMaxima,320-(maxLoc.x+VentanaMaxima)).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
+                Fila2   = grayImage.colRange(0,320).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
+
+                matchTemplate(Fila2,Origen2,Destino2,CV_TM_CCOEFF_NORMED);
+                minMaxLoc( Destino2, &minVal2, &maxVal2, &minLoc2, &maxLoc2, Mat() );
+
+                if(abs(maxLoc2.x+VentanaMaxima - P.x()) <= 3  )
+                {
+                    qDebug()<<"Punto Dentro";
+                    ListaEsquinas[i].P2=maxLoc;
+                    ListaEsquinas[i].P2.y=P.y();
+                    ListaEsquinas[i].P2.x+=VentanaMaxima;
+                    ListaEsquinas[i].homol=true;
+                    Fijos.at<uchar>(P.y(),P.x())=1;
+                    Disparidad.at<float>(P.y(),P.x())=P.x()-ListaEsquinas[i].P2.x;
+                    id=ImagenRegiones.at<int>(P.y(),P.x());
+                    ListaRegiones[id].disp+=Disparidad.at<float>(P.y(),P.x());
+                    ListaRegiones[id].nFijos++;
+                }
+
+            }else{
+                qDebug()<<"KKKKKKKKKKKKKKKKKKKKKK";
+                ListaEsquinas[i].P2=maxLoc;
+                ListaEsquinas[i].P2.y=P.y();
+                ListaEsquinas[i].P2.x+=VentanaMaxima;
+                ListaEsquinas[i].homol=true;
+                Fijos.at<uchar>(P.y(),P.x())=1;
+                Disparidad.at<float>(P.y(),P.x())=P.x()-ListaEsquinas[i].P2.x;
+                id=ImagenRegiones.at<int>(P.y(),P.x());
+                ListaRegiones[id].disp+=Disparidad.at<float>(P.y(),P.x());
+                ListaRegiones[id].nFijos++;
+            }
         }else
             ListaEsquinas[i].homol=false;
     }
@@ -770,10 +816,12 @@ void MainWindow::matching(){
 }
 
 void MainWindow::InitializeDisparity(){
+    //clear();
     Canny(grayImage,ImagenBordes);
     Segmentacion();
     Merge();
     Esquinas();
+    InitDisparity();
     PintarSegmentado(grayImage2);
 
 
@@ -781,6 +829,37 @@ void MainWindow::InitializeDisparity(){
 
 void MainWindow::PropagateDisparity(){
 
+    PropagateMaximo=ListaVentanas[ui->comboBox->currentIndex()];
+    int region,region_aux;
+    float disp1,total=0.0;
+    int cont=0;
+    bool fin=false;
+    for (int i =0 ; i < 240; ++i) {
+        for (int j = 0; j < 320; ++j) {
+            if(Fijos.at<uchar>(i,j)!=1){
+                region=ImagenRegiones.at<int>(i,j);
+                cont=0;
+                total=0.0;
+                disp1=Disparidad.at<float>(i,j);
+                for (int k = i-PropagateMaximo/2; k <= i+PropagateMaximo/2; ++k) {
+                    for (int t = j-PropagateMaximo/2; t <= j+PropagateMaximo/2; ++t) {
+                        if((k>=0 && k<240) && (t>=0 && t<320)){
+                            region_aux=ImagenRegiones.at<int>(k,t);
+                            if(region==region_aux){
+                                cont++;
+                                total+=Disparidad.at<float>(k,t);
+                            }
+                        }
+                    }
+                }
+                Disparidad.at<float>(i,j)=total/cont;
+                if(disp1!=Disparidad.at<float>(i,j))
+                    fin=true;
+            }
+        }
+    }
+    ui->PropaButton->setChecked(fin);
+    PintarSegmentado(grayImage2);
 }
 
 void MainWindow::LoadGroundTruth(){
@@ -852,5 +931,36 @@ void MainWindow::nonMaximaSuppression(){
            size=ListaEsquinas.size();
         }
     }    
-    ui->EstimatedLCD->display(size);
+}
+
+void MainWindow::GetDisparity(QPointF P){
+    uchar new_grey_value;
+    uchar old_grey_value;
+
+    new_grey_value=grayImage2.at<uchar>(P.y(),P.x());
+    old_grey_value=destGrayImage2.at<uchar>(P.y(),P.x());
+
+   ui->EstimatedLCD->display(new_grey_value);
+   ui->TrueLCD->display(old_grey_value);
+
+}
+
+void MainWindow::InitDisparity(){
+
+    int region;
+    float disparidad;
+
+    for (int i = 0; i < 240; ++i) {
+        for (int j = 0; j < 320; ++j) {
+            if(Fijos.at<uchar>(i,j)!=1){
+                region=ImagenRegiones.at<int>(i,j);
+                if(ListaRegiones[region].nFijos!=0){
+                     disparidad=(ListaRegiones[region].disp/ListaRegiones[region].nFijos);
+                }else{
+                    disparidad=0;
+                }
+            }
+            Disparidad.at<float>(i,j)=disparidad;
+        }
+    }
 }

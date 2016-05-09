@@ -57,7 +57,7 @@ private:
     Ui::MainWindow *ui;
     int numFoto;
     QTimer timer;
-    int VentanaMaxima;
+    int VentanaMaxima,PropagateMaximo;
     int AnchoImagOri;
     Mat Fijos, Disparidad;
 
@@ -75,6 +75,7 @@ private:
 
     std::vector<STRegion> ListaRegiones;
     std::vector<StructEsquina> ListaEsquinas;
+    std::vector<int> ListaVentanas;
     Mat ImagenRegiones;
     Mat ImagenBordes;
     Mat ImagenVisitados;
@@ -87,7 +88,8 @@ public:
     void nonMaximaSuppression();
     void GetSubMat();
     void matching();
-
+    void InitDisparity();
+    void clear();
 
 public slots:
     void compute();
@@ -97,6 +99,8 @@ public slots:
 
     void selectWindow(QPointF p, int w, int h);
     void deselectWindow();
+    void GetDisparity(QPointF P);
+
 
     void Canny(Mat Img_Source, Mat Img_Dest);
     void AnalisisRegion(Point pInicial,int region, STRegion &aux);
