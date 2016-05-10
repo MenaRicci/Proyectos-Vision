@@ -62,11 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     connect(&timer,SIGNAL(timeout()),this,SLOT(compute()));
-    //connect(ui->captureButton,SIGNAL(clicked(bool)),this,SLOT(start_stop_capture(bool)));
     connect(ui->colorButton,SIGNAL(clicked(bool)),this,SLOT(change_color_gray(bool)));
     connect(ui->LoadButton,SIGNAL(clicked()),this,SLOT(load_Image()));
     connect(ui->InitButton,SIGNAL(clicked()),this,SLOT(InitializeDisparity()));
-   // connect(ui->PropaButton,SIGNAL(clicked()),this,SLOT(PropagateDisparity()));
     connect(ui->GroundButton,SIGNAL(clicked()),this,SLOT(LoadGroundTruth()));
 
 
@@ -77,6 +75,11 @@ MainWindow::MainWindow(QWidget *parent) :
    ListaVentanas.push_back(11);
    ListaVentanas.push_back(13);
    ListaVentanas.push_back(15);
+
+   ListaRepeticiones.push_back(1);
+   ListaRepeticiones.push_back(2);
+   ListaRepeticiones.push_back(3);
+   ListaRepeticiones.push_back(4);
 
 
 
@@ -115,10 +118,6 @@ void MainWindow::compute()
         cvtColor(colorImage, grayImage, CV_BGR2GRAY);
         cvtColor(colorImage, colorImage, CV_BGR2RGB);
     }
-
-
-   // ui->EstimatedLCD->display(0);
-
 
     if(ui->Check_Corners->isChecked())
        PintarEsquinas();
@@ -174,8 +173,6 @@ void MainWindow::start_stop_capture(bool start)
 }
 
 void MainWindow::clear(){
-    grayImage.setTo(0);
-    destGrayImage.setTo(0);
     grayImage2.setTo(0);
     destGrayImage2.setTo(0);
     Disparidad.setTo(0);
@@ -396,7 +393,6 @@ void MainWindow::AnalisisRegionEstadistico(Point pInicial, int region, STRegion 
 
 void MainWindow::Segmentacion(){
     Point p;
-    ListaRegiones.clear();
     int contRegion=0;
     STRegion aux;
     for (int i = 0; i < 240; ++i) {
@@ -711,15 +707,6 @@ void MainWindow::UnirRegiones(int id, int id_aux){
             }
  }
 
-//--------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-
-
-//--------------------------------------------------------------------------------------
 
 void MainWindow::Esquinas(){
 
@@ -774,7 +761,6 @@ void MainWindow::matching(){
 
         if(maxVal>=0.95){
            if(maxLoc.x >= 0 && maxLoc.x + 2*VentanaMaxima <320){
-                qDebug()<<"HOMO";
                 Origen2 = destGrayImage.colRange(maxLoc.x,maxLoc.x+2*VentanaMaxima).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
                 //Fila2   = grayImage.colRange(maxLoc.x+VentanaMaxima,320-(maxLoc.x+VentanaMaxima)).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
                 Fila2   = grayImage.colRange(0,320).rowRange(P.y()-VentanaMaxima,P.y()+VentanaMaxima);
@@ -784,7 +770,6 @@ void MainWindow::matching(){
 
                 if(abs(maxLoc2.x+VentanaMaxima - P.x()) <= 3  )
                 {
-                    qDebug()<<"Punto Dentro";
                     ListaEsquinas[i].P2=maxLoc;
                     ListaEsquinas[i].P2.y=P.y();
                     ListaEsquinas[i].P2.x+=VentanaMaxima;
@@ -797,7 +782,6 @@ void MainWindow::matching(){
                 }
 
             }else{
-                qDebug()<<"KKKKKKKKKKKKKKKKKKKKKK";
                 ListaEsquinas[i].P2=maxLoc;
                 ListaEsquinas[i].P2.y=P.y();
                 ListaEsquinas[i].P2.x+=VentanaMaxima;
@@ -816,9 +800,12 @@ void MainWindow::matching(){
 }
 
 void MainWindow::InitializeDisparity(){
-    //clear();
     Canny(grayImage,ImagenBordes);
+    ListaRegiones.clear();
     Segmentacion();
+    Merge();
+    Merge();
+    Merge();
     Merge();
     Esquinas();
     InitDisparity();
@@ -865,7 +852,6 @@ void MainWindow::PropagateDisparity(){
 void MainWindow::LoadGroundTruth(){
 
     capture=false;
-    ui->captureButton->setText("Pulsar Para Capturar");
     loadbool=true;
 
     QString filters("JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)");

@@ -76,6 +76,8 @@ private:
     std::vector<STRegion> ListaRegiones;
     std::vector<StructEsquina> ListaEsquinas;
     std::vector<int> ListaVentanas;
+    std::vector<int> ListaRepeticiones;
+
     Mat ImagenRegiones;
     Mat ImagenBordes;
     Mat ImagenVisitados;
