@@ -1,8 +1,6 @@
 #Repositorio para los proyectos de Vision Artificial
 
-# Autores 
-
-#Comentario HOLA
+Autores 
 
 Guillermo Mena Juez
 Alberto Ricci Vazquez 
