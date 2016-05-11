@@ -806,7 +806,7 @@ void MainWindow::InitializeDisparity(){
     Merge();
     Merge();
     Merge();
-    Merge();
+   Merge();
     Esquinas();
     InitDisparity();
     PintarSegmentado(grayImage2);

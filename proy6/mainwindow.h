@@ -20,6 +20,21 @@ using namespace cv;
 namespace Ui {
     class MainWindow;
 }
+typedef struct{
+    Point Centro;
+    Mat Contenido;
+}Cambio;
+
+typedef struct{
+ int NumCambios;
+ std::vector<Cambio> VectorCambio;
+}Captura;
+
+typedef struct{
+    int TamVentana;
+    Mat Img_Referencia;
+    std::vector<Captura> VectorCaptura;
+}Estructura_Record;
 
 class MainWindow : public QMainWindow
 {
@@ -44,6 +59,22 @@ private:
     Rect imageWindow;
 
 
+    std::vector<Point2f> ListaPuntos_Prev;
+    std::vector<Point2f> ListaPuntos_Next;
+    Estructura_Record Record;
+
+    Mat Img_Refer;
+
+    int ContVideo;
+
+
+
+public:
+ void Grabar();
+ void Play(int i);
+ void GetPuntos();
+ void CalculoOptico(Mat Img_Pre, Mat Img_Next);
+ void Programa();
 public slots:
     void compute();
     void start_stop_capture(bool start);
@@ -51,6 +82,7 @@ public slots:
 
     void selectWindow(QPointF p, int w, int h);
     void deselectWindow();
+    void save_Image();
 
 };
 

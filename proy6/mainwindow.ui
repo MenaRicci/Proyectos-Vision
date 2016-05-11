@@ -121,16 +121,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QSpinBox" name="Spin_Flow">
-   <property name="geometry">
-    <rect>
-     <x>790</x>
-     <y>200</y>
-     <width>81</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QSpinBox" name="Spin_Windows">
    <property name="geometry">
     <rect>
@@ -139,6 +129,12 @@
      <width>81</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="minimum">
+    <number>3</number>
+   </property>
+   <property name="singleStep">
+    <number>2</number>
    </property>
   </widget>
   <widget class="QLCDNumber" name="LCD_Normal">
@@ -251,6 +247,22 @@
    </property>
    <property name="text">
     <string>Windows Size</string>
+   </property>
+  </widget>
+  <widget class="QDoubleSpinBox" name="Spin_Flow">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>200</y>
+     <width>69</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <double>0.200000000000000</double>
+   </property>
+   <property name="singleStep">
+    <double>0.200000000000000</double>
    </property>
   </widget>
  </widget>
