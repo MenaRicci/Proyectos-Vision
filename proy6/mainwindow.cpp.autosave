@@ -69,8 +69,11 @@ void MainWindow::compute()
     if(ui->PlayButton->isChecked()){
         int size=Record.VectorCaptura.size();
         qDebug()<<"Tamaño Size: "<< size;
+        
         int value=(240*320*size/1000);
+      
         ui->LCD_Normal->display(value);
+        
         if (ContVideo< size){
             Play(ContVideo);
             ContVideo++;
