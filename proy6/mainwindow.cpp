@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(visorS,SIGNAL(pressEvent()),this,SLOT(deselectWindow()));
     timer.start(60);
     ContVideo=0;
-
+    TamComp=320*240;
 }
 
 MainWindow::~MainWindow()
@@ -68,12 +68,10 @@ void MainWindow::compute()
 
     if(ui->PlayButton->isChecked()){
         int size=Record.VectorCaptura.size();
-        qDebug()<<"Tamaño Size: "<< size;
-
         int value=(240*320*size/1000);
 
         ui->LCD_Normal->display(value);
-
+        ui->LCD_Compressed->display(TamComp/1000);
         if (ContVideo< size){
             Play(ContVideo);
             ContVideo++;
@@ -85,6 +83,7 @@ void MainWindow::compute()
             Record.Img_Referencia.setTo(0);
             ListaPuntos_Next.clear();
             ListaPuntos_Prev.clear();
+            TamComp=320*240;
         }
     }
     if(ui->RecordButton->isChecked())
@@ -183,7 +182,6 @@ int TamVentana=Record.TamVentana;
         destGrayImage=Record.Img_Referencia.clone();
     }else{
         NumCambios=Record.VectorCaptura[i].VectorCambio.size();
-        qDebug()<<NumCambios;
         for (int j = 0; j < NumCambios; j++) {
             Centro=Record.VectorCaptura[i].VectorCambio[j].Centro;
             Record.VectorCaptura[i].VectorCambio[j].Contenido.copyTo(Ventana);
@@ -257,6 +255,7 @@ void MainWindow::CalculoOptico(Mat Img_Pre, Mat Img_Next){
             Cap.VectorCambio.push_back(C);
         }
      }
+     TamComp+=4+Cap.NumCambios*(8+TamVentana*TamVentana);
      if(Cap.NumCambios!=0){
         Record.VectorCaptura.push_back(Cap);
      }

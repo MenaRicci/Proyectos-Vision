@@ -48,6 +48,7 @@ private:
     Ui::MainWindow *ui;
     int numFoto;
     QTimer timer;
+    int TamComp;
 
     VideoCapture *cap;
     RCDraw *visorS, *visorD;
