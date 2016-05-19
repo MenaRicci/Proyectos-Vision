@@ -83,7 +83,6 @@ public slots:
 
     void selectWindow(QPointF p, int w, int h);
     void deselectWindow();
-    void save_Image();
 
 };
 

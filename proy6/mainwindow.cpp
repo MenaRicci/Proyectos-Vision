@@ -90,7 +90,6 @@ void MainWindow::compute()
         Grabar();
 
 
-
     if(showColorImage)
     {
         memcpy(imgS->bits(), colorImage.data , 320*240*3*sizeof(uchar));
@@ -187,15 +186,12 @@ int TamVentana=Record.TamVentana;
             Record.VectorCaptura[i].VectorCambio[j].Contenido.copyTo(Ventana);
             Ventana.copyTo(destGrayImage.rowRange(Centro.y-TamVentana/2,Centro.y+TamVentana/2+1).colRange(Centro.x-TamVentana/2,Centro.x+TamVentana/2+1));
         }
-
     }
-
 }
 
 void MainWindow::Grabar(){
     int size=Record.VectorCaptura.size();
     Captura C;
-    //qDebug()<<"Hola";
     if(size==0){
         GetPuntos();
         Record.Img_Referencia=grayImage.clone();
@@ -211,14 +207,49 @@ void MainWindow::Grabar(){
 void MainWindow::GetPuntos(){
     int TamVentana=ui->Spin_Windows->value();
     Point2f P;
-    for (int i = TamVentana/2; i < 320-TamVentana/2 ; i+=TamVentana) {
-        for (int j = TamVentana/2; j < 240-TamVentana/2; j+=TamVentana) {
+        int i,j;
+    for(i = TamVentana/2; i < 320-TamVentana/2 ; i+=TamVentana) {
+        for(j = TamVentana/2; j < 240-TamVentana/2; j+=TamVentana) {
             P.x=i;
             P.y=j;
             ListaPuntos_Prev.push_back(P);
             ListaPuntos_Next.push_back(P);
         }
     }
+    if(320 % TamVentana != 0){
+        j=239-TamVentana/2 -1;
+
+        for (i=319-TamVentana/2 -1; i >=TamVentana/2; i-=TamVentana) {
+            P.x=i;
+            P.y=j;
+            ListaPuntos_Prev.push_back(P);
+            ListaPuntos_Next.push_back(P);
+        }
+
+        i=TamVentana/2;
+        P.x=i;
+        P.y=j;
+        ListaPuntos_Prev.push_back(P);
+        ListaPuntos_Next.push_back(P);
+    }
+
+    if(240 % TamVentana != 0){
+        i=319-TamVentana/2 -1;
+        for (j =TamVentana/2;j< 240 -TamVentana/2; j+=TamVentana) {
+            P.x=i;
+            P.y=j;
+            ListaPuntos_Prev.push_back(P);
+            ListaPuntos_Next.push_back(P);
+        }
+
+        i=319-TamVentana/2 -1;
+        j=239-TamVentana/2 -1;
+        P.x=i;
+        P.y=j;
+        ListaPuntos_Prev.push_back(P);
+        ListaPuntos_Next.push_back(P);
+    }
+
 }
 
 void MainWindow::CalculoOptico(Mat Img_Pre, Mat Img_Next){
@@ -248,9 +279,8 @@ void MainWindow::CalculoOptico(Mat Img_Pre, Mat Img_Next){
             visorD->drawLine(QLine(A,B),Qt::red,0.5);
             Cap.NumCambios++;
             C.Centro=Centro;
-        //    Img_Next.rowRange(Centro.y-TamVentana/2,Centro.y+TamVentana/2+1).colRange(Centro.x-TamVentana/2,Centro.x+TamVentana/2 +1).copyTo(C.Contenido);
-            C.Contenido=Img_Next.rowRange(Centro.y-TamVentana/2,Centro.y+TamVentana/2+1).colRange(Centro.x-TamVentana/2,Centro.x+TamVentana/2 +1).clone();
 
+            C.Contenido=Img_Next.rowRange(Centro.y-TamVentana/2,Centro.y+TamVentana/2+1).colRange(Centro.x-TamVentana/2,Centro.x+TamVentana/2 +1).clone();
             C.Contenido.copyTo(Img_Refer.rowRange(Centro.y-TamVentana/2,Centro.y+TamVentana/2+1).colRange(Centro.x-TamVentana/2,Centro.x+TamVentana/2 +1));
             Cap.VectorCambio.push_back(C);
         }
@@ -260,79 +290,3 @@ void MainWindow::CalculoOptico(Mat Img_Pre, Mat Img_Next){
         Record.VectorCaptura.push_back(Cap);
      }
 }
-
-void MainWindow::save_Image()
-{
-capture=false;
- QString filename=QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),
-    "JPG files (*.jpg);;BMP files (*.bmp);;PNG files (*.png);;All files (*.*)",
-     new QString("Text files (*.txt)"));
-
- if(!filename.isEmpty()){
-    if(showColorImage){
-        cvtColor(colorImage, colorImage, CV_BGR2RGB); //
-        imwrite(filename.toStdString(), colorImage);
-    }
-    else{
-        imwrite(filename.toStdString(), grayImage);
-    }
-}
-
-}
-/*
-void MainWindow::Programa()
-{
-//    if (argc != 4)
-//    {
-//        cout << "Not enough parameters" << endl;
-//        return -1;
-//    }
-
-//    const string source      = argv[1];           // the source file name
-//    const bool askOutputType = argv[3][0] =='Y';  // If false it will use the inputs codec type
-
-
-    const QString filename=QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),"JPG files (*.avi);;All files (*.*)",new QString("Text files (*.avi)"));
-
-    String source=filename.toStdString();
-    VideoCapture inputVideo(source);              // Open input
-
-    string::size_type pAt = source.find_last_of('.');                  // Find extension point
-    const string NAME = source.substr(0, pAt) + source + ".avi";   // Form the new name with container
-    int ex = static_cast<int>(inputVideo.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
-
-    // Transform from int to char via Bitwise operators
-    char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
-
-    Size S = Size((int) inputVideo.set(CV_CAP_PROP_FRAME_WIDTH,320),    // Acquire input size
-                  (int) inputVideo.set(CV_CAP_PROP_FRAME_HEIGHT,240));
-
-    VideoWriter outputVideo;                                        // Open the output
-    outputVideo.open(NAME, ex, inputVideo.get(CV_CAP_PROP_FPS), S, true);
-
-    qDebug() << "Input frame resolution: Width=" << S.width << "  Height=" << S.height
-         << " of nr#: " << inputVideo.get(CV_CAP_PROP_FRAME_COUNT);
-    qDebug() << "Input codec type: " << EXT;
-
-    int channel = 2; // Select the channel to save
-    channel=1;
-    Mat src, res;
-    vector<Mat> ;
-
-    for(;;) //Show the image captured in the window and repeat
-    {
-        inputVideo >> src;              // read
-        if (src.empty()) break;         // check if at end
-
-        split(src, spl);                // process - extract only the correct channel
-        for (int i =0; i < 3; ++i)
-            if (i != channel)
-                spl[i] = Mat::zeros(S, spl[0].type());
-       merge(spl, res);
-       //outputVideo.write(res); //save or
-       outputVideo << res;
-    }
-qDebug()<<"FINIsh";
-}
-*/
-
